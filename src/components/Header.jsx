@@ -8,6 +8,7 @@ const Header = () => {
   const { toggleSidebar } = useUI()
   const isFeedPage = location.pathname === '/feed'
   const isSongPage = location.pathname.startsWith('/song')
+  const isUserPage = location.pathname.startsWith('/user') || location.pathname === '/profile'
   const isSendRespectPage = location.pathname === '/send-respect'
   
   return (
@@ -19,8 +20,8 @@ const Header = () => {
           <span className="hamburger-line"></span>
         </button>
         
-        {/* Desktop'ta feed ve song sayfasında arama motoru, send respect sayfasında "Respect Gönder", diğerlerinde title */}
-        {isFeedPage || isSongPage ? (
+        {/* Desktop'ta feed, song ve user sayfasında arama motoru, send respect sayfasında "Respect Gönder", diğerlerinde title */}
+        {isFeedPage || isSongPage || isUserPage ? (
           <>
             {/* Mobile'da title görünecek, desktop'ta gizlenecek */}
             <h1 className="app-title mobile-only">Respect Müzik</h1>
@@ -58,8 +59,8 @@ const Header = () => {
         </button>
       </div>
       
-      {/* Mobile'da feed ve song sayfasında arama motoru alt tarafta kalacak */}
-      {(isFeedPage || isSongPage) && (
+      {/* Mobile'da feed, song ve user sayfasında arama motoru alt tarafta kalacak */}
+      {(isFeedPage || isSongPage || isUserPage) && (
         <div className="search-container mobile-search">
           <div className="search-bar">
             <span className="search-icon">
@@ -79,7 +80,7 @@ const Header = () => {
       
       {/* Send respect sayfasında arama motoru yok */}
       {/* Diğer sayfalarda arama motoru alt tarafta */}
-      {!isFeedPage && !isSongPage && !isSendRespectPage && (
+      {!isFeedPage && !isSongPage && !isUserPage && !isSendRespectPage && (
       <div className="search-container">
         <div className="search-bar">
           <span className="search-icon">

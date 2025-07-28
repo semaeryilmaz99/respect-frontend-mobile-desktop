@@ -751,6 +751,325 @@ html {
     background: #2a3740;
     transform: translateY(-1px);
   }
+
+  /* Desktop User Page Styles */
+  .desktop-user-profile {
+    max-width: 1000px;
+    margin: 20px auto;
+    background-color: #fef5e7;
+    border: 2px solid #f69f17;
+    border-radius: 40px;
+    padding: 32px;
+  }
+
+  .desktop-profile-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+
+  .desktop-profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-left: 30px;
+  }
+
+  .desktop-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .desktop-profile-info {
+    flex: 1;
+    text-align: center;
+  }
+
+  .desktop-user-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1b262e;
+    margin-bottom: 8px;
+  }
+
+  .desktop-user-bio {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .desktop-profile-stats {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .desktop-respect-count {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 16px 24px;
+    text-align: center;
+    position: relative;
+  }
+
+  .respect-number {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1b262e;
+  }
+
+  .respect-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  .respect-goal {
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    background: #f69f17;
+    color: white;
+    font-size: 10px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .desktop-edit-profile-btn {
+    background: #f69f17;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .desktop-edit-profile-btn:hover {
+    background: #e8910b;
+    transform: translateY(-2px);
+  }
+
+  /* Şu An Dinliyor - Profile İçinde */
+  .profile-now-playing {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  .profile-now-playing .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1b262e;
+    margin-bottom: 16px;
+  }
+
+  .now-playing-card {
+    background: #fef5e7;
+    border: 1px solid #f69f17;
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .now-playing-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .now-playing-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .now-playing-info {
+    flex: 1;
+  }
+
+  .now-playing-artist {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1b262e;
+    margin-bottom: 4px;
+  }
+
+  .now-playing-album {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .now-playing-quote {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
+    margin: 0;
+  }
+
+  .now-playing-listen-btn {
+    background: #f69f17;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .now-playing-listen-btn:hover {
+    background: #e8910b;
+    transform: translateY(-1px);
+  }
+
+  /* Desktop 2 Kolonlu Layout */
+  .desktop-user-layout {
+    display: flex;
+    gap: 32px;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  .desktop-user-left,
+  .desktop-user-right {
+    flex: 1;
+  }
+
+  /* Desktop Top Artists Override */
+  .desktop-user-left .top-artists-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .desktop-user-left .top-artist-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .desktop-user-left .top-artist-card.top-respecter {
+    border: 2px solid #f69f17;
+  }
+
+  .top-respecter-badge {
+    position: absolute;
+    top: -8px;
+    right: 8px;
+    background: #f69f17;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 8px;
+    z-index: 10;
+  }
+
+  .desktop-user-left .top-artist-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .desktop-user-left .top-artist-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .desktop-user-left .top-artist-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1b262e;
+    margin-bottom: 4px;
+    flex: 1;
+  }
+
+  .desktop-user-left .top-artist-respect {
+    font-size: 12px;
+    color: #f69f17;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* Desktop Top Songs Override */
+  .desktop-user-right .top-songs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .desktop-user-right .top-song-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+  }
+
+  .desktop-user-right .top-song-cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .desktop-user-right .top-song-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .desktop-user-right .top-song-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1b262e;
+    margin-bottom: 4px;
+  }
+
+  .desktop-user-right .top-song-artist {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .desktop-user-right .top-song-respect {
+    font-size: 12px;
+    color: #f69f17;
+    font-weight: 500;
+    margin: 0;
+  }
 }
 
 .chat-messages {
