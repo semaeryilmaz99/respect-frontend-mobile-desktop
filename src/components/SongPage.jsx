@@ -53,66 +53,72 @@ const SongPage = () => {
         <MoreByArtist />
       </div>
 
-      {/* Desktop Layout - 4 Bölümlü */}
-      <div className="song-desktop-layout desktop-only">
-        {/* Sol: En Çok Respect Gönderelenler */}
-        <div className="song-left-panel">
-          <SongTopSupporters />
-        </div>
-
-        {/* Orta Sol: Şarkı Bilgisi + Sanatçıdan Diğer Şarkılar */}
-        <div className="song-center-left">
+      {/* Desktop Layout */}
+      <div className="desktop-only">
+        {/* Song Info - Header'ın Altında */}
+        <div className="desktop-song-info">
           <SongInfo />
-          <MoreByArtist />
         </div>
 
-        {/* Orta Sağ: Respect Gönder */}
-        <div className="song-center-right">
-          <div className="desktop-respect-send">
-            <h3 className="respect-section-title">Respect Gönder</h3>
-            <p className="respect-subtitle">Bu harika şarkıya desteğini göster</p>
-            
-            <div className="quick-respect-buttons">
-              <button 
-                className="quick-respect-btn" 
-                onClick={() => handleQuickRespect(50)}
-              >
-                50 Respect
-              </button>
-              <button 
-                className="quick-respect-btn" 
-                onClick={() => handleQuickRespect(100)}
-              >
-                100 Respect
-              </button>
-              <button 
-                className="quick-respect-btn" 
-                onClick={() => handleQuickRespect(250)}
-              >
-                250 Respect
-              </button>
-              <button 
-                className="quick-respect-btn" 
-                onClick={() => handleQuickRespect(500)}
-              >
-                500 Respect
-              </button>
-              <button 
-                className="quick-respect-btn" 
-                onClick={() => handleQuickRespect(1000)}
-              >
-                1000 Respect
-              </button>
-            </div>
-            
-            <button className="full-respect-button" onClick={handleFullRespect}>
-              Respect Gönder
+        {/* 2 Bölümlü Layout */}
+        <div className="song-desktop-layout">
+          {/* Sol: En Çok Respect Gönderelenler */}
+          <div className="song-left-panel">
+            <SongTopSupporters />
+          </div>
+
+          {/* Sağ: Sanatçıdan Diğer Şarkılar */}
+          <div className="song-right-content">
+            {/* Sanatçıdan Diğer Şarkılar */}
+            <MoreByArtist />
+          </div>
+
+          {/* Chat (Fixed Positioned - diğerlerinin üstünde) */}
+          <SongRealTimeChat />
+        </div>
+
+        {/* Desktop Fixed Respect Gönder - Sol Alt */}
+        <div className="desktop-fixed-respect-send">
+          <h3 className="respect-section-title">Respect Gönder</h3>
+          <p className="respect-subtitle">Bu harika şarkıya desteğini göster</p>
+          
+          <div className="quick-respect-buttons">
+            <button 
+              className="quick-respect-btn" 
+              onClick={() => handleQuickRespect(50)}
+            >
+              50 Respect
+            </button>
+            <button 
+              className="quick-respect-btn" 
+              onClick={() => handleQuickRespect(100)}
+            >
+              100 Respect
+            </button>
+            <button 
+              className="quick-respect-btn" 
+              onClick={() => handleQuickRespect(250)}
+            >
+              250 Respect
+            </button>
+            <button 
+              className="quick-respect-btn" 
+              onClick={() => handleQuickRespect(500)}
+            >
+              500 Respect
+            </button>
+            <button 
+              className="quick-respect-btn" 
+              onClick={() => handleQuickRespect(1000)}
+            >
+              1000 Respect
             </button>
           </div>
+          
+          <button className="full-respect-button" onClick={handleFullRespect}>
+            Respect Gönder
+          </button>
         </div>
-
-        {/* Sağ: Chat (zaten fixed positioned) */}
-        <SongRealTimeChat />
       </div>
     </div>
   )

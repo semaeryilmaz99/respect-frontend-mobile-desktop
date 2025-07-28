@@ -680,6 +680,77 @@ html {
   .song-page .real-time-chat.closed {
     max-height: 60px;
   }
+
+  /* Desktop Fixed Respect Gönder - Sol Alt */
+  .desktop-fixed-respect-send {
+    position: fixed;
+    bottom: 0;
+    left: 20px;
+    width: 380px;
+    background: linear-gradient(135deg, #f8a61d 0%, #feb822 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: #1b262e;
+    box-shadow: 0 4px 16px rgba(248, 166, 29, 0.3);
+    z-index: 999;
+  }
+
+  .desktop-fixed-respect-send .respect-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .desktop-fixed-respect-send .respect-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+
+  .desktop-fixed-respect-send .quick-respect-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .desktop-fixed-respect-send .quick-respect-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1b262e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .desktop-fixed-respect-send .quick-respect-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+  }
+
+  .desktop-fixed-respect-send .full-respect-button {
+    width: 100%;
+    background: #1b262e;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .desktop-fixed-respect-send .full-respect-button:hover {
+    background: #2a3740;
+    transform: translateY(-1px);
+  }
 }
 
 .chat-messages {
@@ -889,101 +960,81 @@ html {
     padding-bottom: 40px;
   }
 
-  /* Desktop Song Layout - 4 Bölümlü */
+  /* Desktop Song Info - Header'ın Altında */
+  .desktop-song-info {
+    max-width: 1000px;
+    height: 200px;
+    margin: 16px auto;
+    background-color: #fef5e7;
+    border: 1px solid #f69f17;
+    border-radius: 40px;
+    padding: 12px 20px;
+  }
+
+  /* Desktop Song Info İç Düzeni */
+  .desktop-song-info .song-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 100px;
+  }
+
+  .desktop-song-info .song-album-cover {
+    flex-shrink: 0;
+    width: 150px;
+    height: 150px;
+  }
+
+  .desktop-song-info .song-album-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+  }
+
+  .desktop-song-info .song-details {
+    flex: 1;
+    text-align: left;
+  }
+
+  /* Desktop Song Details Butonları */
+  .desktop-song-info .song-buttons .play-spotify-button,
+  .desktop-song-info .song-buttons .send-respect-button {
+    height: 50px;
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+
+  /* Desktop Song Layout - 2 Bölümlü */
   .song-desktop-layout {
     display: flex;
-    gap: 24px;
-    max-width: 1400px;
+    gap: 32px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 24px;
-    padding-right: 440px; /* Chat alanı için boşluk */
+    padding-left: 274px; /* 200px sağa kayma + 24px orijinal padding */
+    padding-right: 420px; /* Chat alanı için boşluk */
   }
 
   /* Sol Panel - En Çok Respect Gönderelenler */
   .song-left-panel {
-    width: 280px;
-    flex-shrink: 0;
-  }
-
-  /* Orta Sol - Şarkı Bilgisi + Diğer Şarkılar */
-  .song-center-left {
-    flex: 1;
-    min-width: 400px;
-  }
-
-  /* Orta Sağ - Respect Gönder */
-  .song-center-right {
     width: 320px;
     flex-shrink: 0;
+    position: static;
   }
 
-  /* Desktop Respect Gönder Bölümü */
-  .desktop-respect-send {
-    background: linear-gradient(135deg, #f8a61d 0%, #feb822 100%);
-    border-radius: 16px;
-    padding: 24px;
-    color: #1b262e;
-    box-shadow: 0 4px 16px rgba(248, 166, 29, 0.2);
-  }
-
-  .respect-section-title {
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-
-  .respect-subtitle {
-    font-size: 14px;
-    opacity: 0.8;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .quick-respect-buttons {
+  /* Sağ Panel - Tüm Diğer İçerikler */
+  .song-right-content {
+    flex: 1;
     display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 20px;
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
   }
 
-  .quick-respect-btn {
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #1b262e;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-  }
-
-  .quick-respect-btn:hover {
-    background: rgba(255, 255, 255, 1);
-    border-color: rgba(255, 255, 255, 0.8);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-
-  .full-respect-button {
-    width: 100%;
-    background: #1b262e;
-    color: #ffffff;
-    border: none;
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .full-respect-button:hover {
-    background: #2a3740;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(27, 38, 46, 0.3);
+  /* Sağ panel içindeki bölümler */
+  .song-right-content > .more-by-artist {
+    flex: 1;
   }
 }
 
