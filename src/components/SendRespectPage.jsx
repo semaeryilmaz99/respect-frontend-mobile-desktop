@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { respectService } from '../api'
 import Header from './Header'
@@ -22,6 +22,14 @@ const SendRespectPage = () => {
   }
 
   const respectAmounts = [20, 50, 100, 200, 500, 1000]
+
+  // Preselected amount support
+  useEffect(() => {
+    if (songData.preselectedAmount) {
+      setSelectedAmount(songData.preselectedAmount)
+      setCustomAmount('')
+    }
+  }, [songData.preselectedAmount])
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount)

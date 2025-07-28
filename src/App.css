@@ -663,6 +663,25 @@ html {
   pointer-events: none;
 }
 
+/* Desktop Song Page Real-Time Chat */
+@media (min-width: 768px) {
+  .song-page .real-time-chat {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    left: auto;
+    width: 400px;
+    max-height: 500px;
+    border-radius: 16px;
+    border: 2px solid #fbdb3a;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .song-page .real-time-chat.closed {
+    max-height: 60px;
+  }
+}
+
 .chat-messages {
   padding: 0;
   margin-bottom: 16px;
@@ -862,6 +881,110 @@ html {
 .song-content {
   flex: 1;
   padding-bottom: 320px;
+}
+
+/* Desktop Song Content - Alt boşluğu kaldır */
+@media (min-width: 768px) {
+  .song-content {
+    padding-bottom: 40px;
+  }
+
+  /* Desktop Song Layout - 4 Bölümlü */
+  .song-desktop-layout {
+    display: flex;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    padding-right: 440px; /* Chat alanı için boşluk */
+  }
+
+  /* Sol Panel - En Çok Respect Gönderelenler */
+  .song-left-panel {
+    width: 280px;
+    flex-shrink: 0;
+  }
+
+  /* Orta Sol - Şarkı Bilgisi + Diğer Şarkılar */
+  .song-center-left {
+    flex: 1;
+    min-width: 400px;
+  }
+
+  /* Orta Sağ - Respect Gönder */
+  .song-center-right {
+    width: 320px;
+    flex-shrink: 0;
+  }
+
+  /* Desktop Respect Gönder Bölümü */
+  .desktop-respect-send {
+    background: linear-gradient(135deg, #f8a61d 0%, #feb822 100%);
+    border-radius: 16px;
+    padding: 24px;
+    color: #1b262e;
+    box-shadow: 0 4px 16px rgba(248, 166, 29, 0.2);
+  }
+
+  .respect-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .respect-subtitle {
+    font-size: 14px;
+    opacity: 0.8;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .quick-respect-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .quick-respect-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1b262e;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .quick-respect-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .full-respect-button {
+    width: 100%;
+    background: #1b262e;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .full-respect-button:hover {
+    background: #2a3740;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(27, 38, 46, 0.3);
+  }
 }
 
 /* Song Info Styles */
