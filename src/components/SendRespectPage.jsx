@@ -70,56 +70,121 @@ const SendRespectPage = () => {
       </div>
       <Header />
 
-      <div className="respect-content">
-        <div className="song-info-section">
-          <div className="song-cover">
-            <img src={songData.songCover} alt={songData.songTitle} />
+      <div className="respect-main-container">
+        {/* Sol Bölüm - Sadece Masaüstünde Görünür */}
+        <div className="respect-left-panel desktop-only">
+          {/* Hızlı Gönderim Butonu */}
+          <div className="quick-send-section">
+            <h3 className="panel-title">Hızlı Gönderim</h3>
+            <button 
+              className="quick-send-button"
+              onClick={() => handleAmountSelect(100)}
+              disabled={loading}
+            >
+              100 Respect Gönder
+            </button>
           </div>
-          <div className="song-details">
-            <h2 className="song-name">{songData.songTitle}</h2>
-            <p className="artist-name">{songData.artistName}</p>
-          </div>
-        </div>
 
-        <div className="amount-selection">
-          <h3 className="section-title">Miktar Seç</h3>
-          
-          {error && (
-            <div className="error-message" style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
-              {error}
+          {/* Sanatçı Teşekkür Mesajı */}
+          <div className="artist-thanks-section">
+            <h3 className="panel-title">Sanatçı Mesajı</h3>
+            <div className="thanks-message">
+              <div className="artist-avatar">
+                <img src="/src/assets/user/Image.png" alt="Sanatçı" />
+              </div>
+              <div className="thanks-text">
+                <p>"Desteğiniz için çok teşekkür ederim! Müziğimi sevdiğiniz için mutluyum."</p>
+                <span className="artist-signature">- {songData.artistName}</span>
+              </div>
             </div>
-          )}
-          
-          <div className="amount-grid">
-            {respectAmounts.map((amount) => (
-              <button
-                key={amount}
-                className={`amount-button ${selectedAmount === amount ? 'selected' : ''}`}
-                onClick={() => handleAmountSelect(amount)}
-                disabled={loading}
-              >
-                {amount} Respect
-              </button>
-            ))}
           </div>
 
-          <input
-            type="number"
-            placeholder="Miktar girin"
-            value={customAmount}
-            onChange={handleCustomAmountChange}
-            className="custom-amount-input"
-            disabled={loading}
-          />
+          {/* İstatistik Bildirimleri */}
+          <div className="stats-section">
+            <h3 className="panel-title">İstatistikler</h3>
+            <div className="stat-item">
+              <p>Bugün bu şarkıya respect gönderen <strong>18. kişisiniz</strong></p>
+            </div>
+          </div>
+
+          {/* Son Respect Göndericiler */}
+          <div className="recent-supporters-section">
+            <h3 className="panel-title">Son Respect Gönderen 5 Kişi</h3>
+            <div className="recent-supporters-list">
+              {[
+                { name: 'Ahmet K.', amount: 200, time: '2 dk önce' },
+                { name: 'Ayşe M.', amount: 150, time: '5 dk önce' },
+                { name: 'Mehmet Y.', amount: 100, time: '8 dk önce' },
+                { name: 'Fatma S.', amount: 50, time: '12 dk önce' },
+                { name: 'Ali R.', amount: 300, time: '15 dk önce' }
+              ].map((supporter, index) => (
+                <div key={index} className="supporter-item">
+                  <div className="supporter-avatar">
+                    <img src={`/src/assets/user/Image (${index + 1}).png`} alt={supporter.name} />
+                  </div>
+                  <div className="supporter-info">
+                    <span className="supporter-name">{supporter.name}</span>
+                    <span className="supporter-amount">{supporter.amount} Respect</span>
+                  </div>
+                  <span className="supporter-time">{supporter.time}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <button 
-          className="send-support-button"
-          onClick={handleSendRespect}
-          disabled={(!selectedAmount && !customAmount) || loading}
-        >
-          {loading ? 'Gönderiliyor...' : 'Gönder ve Destekle'}
-        </button>
+        {/* Sağ Bölüm - Mevcut Respect Content */}
+        <div className="respect-content">
+          <div className="song-info-section">
+            <div className="song-cover">
+              <img src={songData.songCover} alt={songData.songTitle} />
+            </div>
+            <div className="song-details">
+              <h2 className="song-name">{songData.songTitle}</h2>
+              <p className="artist-name">{songData.artistName}</p>
+            </div>
+          </div>
+
+          <div className="amount-selection">
+            <h3 className="section-title">Miktar Seç</h3>
+            
+            {error && (
+              <div className="error-message" style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+                {error}
+              </div>
+            )}
+            
+            <div className="amount-grid">
+              {respectAmounts.map((amount) => (
+                <button
+                  key={amount}
+                  className={`amount-button ${selectedAmount === amount ? 'selected' : ''}`}
+                  onClick={() => handleAmountSelect(amount)}
+                  disabled={loading}
+                >
+                  {amount} Respect
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="number"
+              placeholder="Miktar girin"
+              value={customAmount}
+              onChange={handleCustomAmountChange}
+              className="custom-amount-input"
+              disabled={loading}
+            />
+          </div>
+
+          <button 
+            className="send-support-button"
+            onClick={handleSendRespect}
+            disabled={(!selectedAmount && !customAmount) || loading}
+          >
+            {loading ? 'Gönderiliyor...' : 'Gönder ve Destekle'}
+          </button>
+        </div>
       </div>
     </div>
   )
