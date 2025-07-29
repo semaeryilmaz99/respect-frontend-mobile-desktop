@@ -3,9 +3,9 @@ import { supabase } from '../config/supabase.js'
 // Supabase Authentication service
 const authService = {
   // Email & Password Login
-  login: async (credentials) => {
+  login: async ({ email, password }) => {
     try {
-      const { email, password } = credentials
+      console.log('🔐 Attempting login with Supabase...')
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -16,14 +16,28 @@ const authService = {
         throw new Error(error.message)
       }
 
-      // Store user data in localStorage (compatible with existing app context)
+      console.log('✅ Login successful:', data)
+
+      // User profile bilgilerini al
       if (data.user) {
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+
+        if (profileError) {
+          console.error('Profile fetch error:', profileError)
+        }
+
+        // localStorage'a kaydet
         localStorage.setItem('authToken', data.session.access_token)
         localStorage.setItem('user', JSON.stringify({
           id: data.user.id,
           email: data.user.email,
-          name: data.user.user_metadata?.full_name || data.user.email,
-          respectBalance: 1000 // Default balance
+          name: profile?.full_name || data.user.email,
+          username: profile?.username,
+          respectBalance: profile?.respect_balance || 1000
         }))
       }
 
@@ -32,17 +46,19 @@ const authService = {
         session: data.session,
         token: data.session.access_token
       }
+
     } catch (error) {
-      console.error('Login error:', error)
+      console.error('❌ Login error:', error)
       throw error
     }
   },
 
-  // Email & Password Signup
-  signup: async (userData) => {
+  // Signup with profile creation
+  signup: async ({ email, password, fullName, username }) => {
     try {
-      const { email, password, fullName, username } = userData
+      console.log('🔐 Attempting signup with Supabase...')
       
+      // 1. Supabase Auth ile user oluştur
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -58,25 +74,34 @@ const authService = {
         throw new Error(error.message)
       }
 
-      // Note: User might need email confirmation
-      if (data.user && data.session) {
-        localStorage.setItem('authToken', data.session.access_token)
-        localStorage.setItem('user', JSON.stringify({
-          id: data.user.id,
-          email: data.user.email,
-          name: fullName || data.user.email,
-          respectBalance: 1000
-        }))
+      console.log('✅ Auth signup successful:', data)
+
+      // 2. User profile oluştur (eğer user oluşturulduysa)
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: data.user.id,
+            username: username,
+            full_name: fullName,
+            respect_balance: 1000
+          })
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Profile oluşturulamazsa bile auth başarılı sayılır
+        }
       }
 
       return {
         user: data.user,
         session: data.session,
         token: data.session?.access_token,
-        needsConfirmation: !data.session // true if email confirmation needed
+        needsConfirmation: !data.session
       }
+
     } catch (error) {
-      console.error('Signup error:', error)
+      console.error('❌ Signup error:', error)
       throw error
     }
   },

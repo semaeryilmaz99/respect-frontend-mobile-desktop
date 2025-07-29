@@ -1,133 +1,101 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from './Header'
 import FeedCard from './FeedCard'
 import RealTimeChat from './RealTimeChat'
+import feedService from '../api/feedService'
 
 const FeedPage = () => {
   const [activeTab, setActiveTab] = useState('community')
+  const [feedData, setFeedData] = useState([])
+  const [respectFlowData, setRespectFlowData] = useState([])
+  const [topArtists, setTopArtists] = useState([])
+  const [topSongs, setTopSongs] = useState([])
+  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   
   const handleRespectSend = () => {
     navigate('/send-respect')
   }
 
-  // Respect Akışı verileri (desktop sol panel için)
-  const respectFlowData = [
-    {
-      id: 1,
-      user: { name: 'Ahmet Yılmaz', avatar: '/src/assets/user/Image.png' },
-      artist: { name: 'Sezen Aksu', avatar: '/src/assets/artist/Image.png' },
-      song: { title: 'Gidiyorum', cover: '/src/assets/song/Image.png' },
-      amount: 50,
-      time: '2 dakika önce',
-      message: 'Bu şarkı harika!'
-    },
-    {
-      id: 2,
-      user: { name: 'Ayşe Demir', avatar: '/src/assets/user/Image (1).png' },
-      artist: { name: 'Tarkan', avatar: '/src/assets/artist/Image (1).png' },
-      song: { title: 'Dudu', cover: '/src/assets/song/Image (1).png' },
-      amount: 100,
-      time: '5 dakika önce',
-      message: 'Efsane şarkı!'
-    },
-    {
-      id: 3,
-      user: { name: 'Mehmet Öz', avatar: '/src/assets/user/Image (2).png' },
-      artist: { name: 'Ajda Pekkan', avatar: '/src/assets/artist/Image (2).png' },
-      song: { title: 'Pet\'r Oil', cover: '/src/assets/song/Image (2).png' },
-      amount: 25,
-      time: '8 dakika önce'
-    },
-    {
-      id: 4,
-      user: { name: 'Fatma Şen', avatar: '/src/assets/user/Image (3).png' },
-      artist: { name: 'Barış Manço', avatar: '/src/assets/artist/Image (3).png' },
-      song: { title: 'Dağlar Dağlar', cover: '/src/assets/song/Image (3).png' },
-      amount: 200,
-      time: '15 dakika önce',
-      message: 'Barış Manço\'nun sesi mükemmel!'
-    },
-    {
-      id: 5,
-      user: { name: 'Ali Kaya', avatar: '/src/assets/user/Image (4).png' },
-      artist: { name: 'Cem Karaca', avatar: '/src/assets/artist/Image (4).png' },
-      song: { title: 'Resimdeki Gözyaşları', cover: '/src/assets/song/Image (4).png' },
-      amount: 75,
-      time: '20 dakika önce'
+  // Database'den verileri yükle
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        
+        // Feed verilerini yükle
+        const feed = await feedService.getFeed()
+        setFeedData(feed)
+        
+        // Respect flow verilerini yükle
+        const respectFlow = await feedService.getRespectFlow()
+        setRespectFlowData(respectFlow)
+        
+        // Top artists yükle
+        const artists = await feedService.getTopArtists()
+        setTopArtists(artists)
+        
+        // Top songs yükle
+        const songs = await feedService.getTopSongs()
+        setTopSongs(songs)
+        
+      } catch (error) {
+        console.error('❌ Feed data load error:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
 
-  // Topluluk sekmesi verileri
-  const communityFeedData = [
-    {
-      type: 'trending-song',
-      title: 'Bu hafta en çok respect alan şarkı: Sezen Aksu - Gidiyorum (2,847 respect)',
-      buttonText: 'Dinle',
-      profileImage: '/src/assets/song/Image.png'
-    },
-    {
-      type: 'new-release',
-      title: 'Yeni şarkı yayınlandı: Tarkan - Yeni Aşk',
-      buttonText: 'Dinle',
-      profileImage: '/src/assets/artist/Image (1).png'
-    },
-    {
-      type: 'chat-reply',
-      title: 'Ajda Pekkan - Bambaşka şarkısında hayranlarına cevap verdi',
-      buttonText: 'Sohbete Katıl',
-      profileImage: '/src/assets/artist/Image (2).png'
-    },
-    {
-      type: 'trending-artist',
-      title: 'Bu ayın trending sanatçısı: Barış Manço (15,482 respect)',
-      buttonText: 'Profili Gör',
-      profileImage: '/src/assets/artist/Image (3).png'
-    },
-    {
-      type: 'respect-notification',
-      title: 'Kullanıcı @musiclover23 Ahmet Kaya - İşte Gidiyorum şarkısına 10 respect gönderdi',
-      buttonText: 'Profili Gör',
-      profileImage: '/src/assets/user/Image.png'
+    loadData()
+  }, [])
+
+  // Database'den gelen verileri formatla
+  const formatFeedData = (data) => {
+    return data.map(item => ({
+      type: item.type,
+      title: getFeedItemTitle(item),
+      buttonText: getFeedItemButtonText(item),
+      profileImage: getFeedItemImage(item)
+    }))
+  }
+
+  const getFeedItemTitle = (item) => {
+    if (item.type === 'respect_sent') {
+      const amount = item.content?.amount || 0
+      const message = item.content?.message || ''
+      const artistName = item.artists?.name || 'Artist'
+      const songTitle = item.songs?.title || 'Song'
+      return `${artistName} - ${songTitle} şarkısına ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
     }
-  ]
+    return 'Respect gönderildi'
+  }
 
-  // Sana Özel sekmesi verileri
-  const personalFeedData = [
-    {
-      type: 'followed-respect',
-      title: 'Takip ettiğin Sezen Aksu - Gidiyorum şarkısına yeni respectler geldi (47 yeni respect)',
-      buttonText: 'Dinle',
-      profileImage: '/src/assets/artist/Image.png'
-    },
-    {
-      type: 'followed-new-song',
-      title: 'Takip ettiğin sanatçı Cem Karaca yeni şarkı yayınladı: "Yeni Türkü"',
-      buttonText: 'Dinle',
-      profileImage: '/src/assets/artist/Image (4).png'
-    },
-    {
-      type: 'followed-chat',
-      title: 'Takip ettiğin Barış Manço - Gülpembe şarkısında yeni sohbet cevabı',
-      buttonText: 'Sohbete Katıl',
-      profileImage: '/src/assets/artist/Image (5).png'
-    },
-    {
-      type: 'chat-reply',
-      title: 'Ahmet Kaya - İşte Gidiyorum şarkısındaki mesajına @fan_ahmet cevap verdi',
-      buttonText: 'Sohbete Katıl',
-      profileImage: '/src/assets/user/Image (1).png'
-    },
-    {
-      type: 'followed-respect',
-      title: 'Takip ettiğin Ajda Pekkan sanatçısına 128 yeni respect gönderildi',
-      buttonText: 'Profili Gör',
-      profileImage: '/src/assets/artist/Image (6).png'
+  const getFeedItemButtonText = (item) => {
+    if (item.type === 'respect_sent') {
+      return 'Detayları Gör'
     }
-  ]
+    return 'Görüntüle'
+  }
 
-  const currentData = activeTab === 'community' ? communityFeedData : personalFeedData
+  const getFeedItemImage = (item) => {
+    return item.artists?.avatar_url || item.songs?.cover_url || '/src/assets/artist/Image.png'
+  }
+
+  // Loading durumu
+  if (loading) {
+    return (
+      <div className="feed-page">
+        <Header />
+        <div className="loading-container">
+          <p>Veriler yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Database'den gelen verileri kullan
+  const currentData = formatFeedData(feedData)
 
   return (
     <div className="feed-page">
@@ -158,6 +126,11 @@ const FeedPage = () => {
       
       {/* Fixed Chat Panel - sadece desktop'ta görünür */}
       <div className="chat-panel">
+        <RealTimeChat />
+      </div>
+      
+      {/* Mobile Chat Panel - sadece mobile'da görünür */}
+      <div className="mobile-chat-panel">
         <RealTimeChat />
       </div>
       

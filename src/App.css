@@ -3186,3 +3186,33 @@ html {
   height: 24px;
   border-radius: 4px;
 }
+
+/* Mobile Chat Panel */
+.mobile-chat-panel {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  z-index: 1000;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .chat-panel {
+    display: none; /* Desktop chat'i mobile'da gizle */
+  }
+  
+  .mobile-chat-panel {
+    display: block; /* Mobile chat'i göster */
+  }
+  
+  /* Feed sayfasında mobile chat için alan bırak */
+  .feed-page {
+    padding-bottom: 300px;
+  }
+}
