@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
-import config from '../config/environment'
-// import { authService } from '../api' // Commented out for demo mode
+import authService from '../api/authService'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -15,105 +14,79 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault()
     
-    // Demo mode - create mock user and login directly
-    setLoading(true)
-    setError('')
-    
-    // Simulate loading for better UX
-    setTimeout(() => {
-      // Create mock user data
-      const mockUser = {
-        id: '1',
-        name: 'Demo Kullanıcı',
-        email: email || 'demo@respect.com',
-        avatar: '/assets/user/Image.png',
-        respectBalance: 1000,
-        isVerified: true,
-        joinDate: new Date().toISOString(),
-        stats: {
-          totalRespectSent: 2500,
-          totalRespectReceived: 1800,
-          favoriteArtists: 12,
-          supportedSongs: 45
-        }
-      }
-      
-      const mockToken = 'demo-jwt-token-' + Date.now()
-      
-      // Set user in context (this makes isAuthenticated = true)
-      actions.setUser({ ...mockUser, token: mockToken })
-      
-      // Store in localStorage for persistence
-      localStorage.setItem(config.STORAGE_KEYS.AUTH_TOKEN, mockToken)
-      localStorage.setItem(config.STORAGE_KEYS.USER, JSON.stringify(mockUser))
-      
-      setLoading(false)
-      navigate('/feed')
-    }, 800) // Slightly longer for better UX
-
-    /* API version - uncomment when backend is ready
     try {
       setLoading(true)
       setError('')
       
-      await authService.login({ email, password })
+      console.log('🔐 Attempting login with Supabase...')
       
-      // Navigate to feed page after successful login
+      const result = await authService.login({ email, password })
+      
+      console.log('✅ Login successful:', result)
+      
+      // Set user in context
+      actions.setUser({
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.user_metadata?.full_name || result.user.email,
+        respectBalance: 1000,
+        token: result.token
+      })
+      
+      // Complete onboarding
+      actions.completeOnboarding()
+      
+      // Navigate to feed
       navigate('/feed')
+      
     } catch (err) {
+      console.error('❌ Login error:', err)
       setError(err.message || 'Giriş yapılırken bir hata oluştu')
     } finally {
       setLoading(false)
     }
-    */
   }
 
-  const handleSpotifyLogin = () => {
-    // Demo mode - create Spotify-style mock user
-    setLoading(true)
-    setError('')
-    
-    setTimeout(() => {
-      const mockSpotifyUser = {
-        id: 'spotify-1',
-        name: 'Spotify Kullanıcı',
-        email: 'spotify@respect.com',
-        avatar: '/assets/spotify.jpg',
-        respectBalance: 500,
-        isVerified: true,
-        spotifyConnected: true,
-        joinDate: new Date().toISOString(),
-        stats: {
-          totalRespectSent: 1200,
-          totalRespectReceived: 900,
-          favoriteArtists: 8,
-          supportedSongs: 28
-        }
-      }
+  const handleSpotifyLogin = async () => {
+    try {
+      setLoading(true)
+      setError('')
       
-      const mockToken = 'spotify-jwt-token-' + Date.now()
+      console.log('🎵 Attempting Spotify OAuth login...')
       
-      // Set user in context
-      actions.setUser({ ...mockSpotifyUser, token: mockToken })
+      const result = await authService.spotifyLogin()
       
-      // Store in localStorage
-      localStorage.setItem(config.STORAGE_KEYS.AUTH_TOKEN, mockToken)
-      localStorage.setItem(config.STORAGE_KEYS.USER, JSON.stringify(mockSpotifyUser))
+      console.log('✅ Spotify OAuth login initiated:', result)
       
+      // OAuth redirect will happen automatically
+      // User will be redirected back to /auth/callback
+      
+    } catch (err) {
+      console.error('❌ Spotify login error:', err)
+      setError(err.message || 'Spotify ile giriş yapılırken bir hata oluştu')
       setLoading(false)
-      navigate('/feed')
-    }, 1000)
-    
-    // Simulate loading for better UX
-    setTimeout(() => {
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      
+      console.log('🔍 Attempting Google OAuth login...')
+      
+      const result = await authService.googleLogin()
+      
+      console.log('✅ Google OAuth login initiated:', result)
+      
+      // OAuth redirect will happen automatically
+      // User will be redirected back to /auth/callback
+      
+    } catch (err) {
+      console.error('❌ Google login error:', err)
+      setError(err.message || 'Google ile giriş yapılırken bir hata oluştu')
       setLoading(false)
-      navigate('/feed')
-    }, 800)
-    
-    /* Spotify OAuth version - uncomment when backend is ready
-    // Spotify OAuth logic will be implemented later
-    console.log('Spotify login clicked')
-    */
+    }
   }
 
   return (
@@ -129,6 +102,11 @@ const LoginPage = () => {
         <button onClick={handleSpotifyLogin} className="spotify-login-button" disabled={loading}>
           <img src="/src/assets/spotify.jpg" alt="Spotify" className="spotify-icon" />
           {loading ? 'Giriş yapılıyor...' : 'Spotify ile Giriş Yap'}
+        </button>
+
+        <button onClick={handleGoogleLogin} className="google-login-button" disabled={loading}>
+          <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="google-icon" />
+          {loading ? 'Giriş yapılıyor...' : 'Google ile Giriş Yap'}
         </button>
 
         <div className="divider">

@@ -11,6 +11,7 @@ import { AppProvider } from './context/AppContext'
 import OnboardingPage from './components/OnboardingPage'
 import LoginPage from './components/LoginPage'
 import SignupPage from './components/SignupPage'
+import AuthCallback from './components/AuthCallback'
 import FeedPage from './components/FeedPage'
 import ArtistPage from './components/ArtistPage'
 import SongPage from './components/SongPage'
@@ -37,6 +38,9 @@ function App() {
         <Routes>
             {/* Onboarding route - Special case without ProtectedRoute */}
             <Route path="/onboarding" element={<OnboardingPage />} />
+            
+            {/* Auth callback route - For OAuth providers */}
+            <Route path="/auth/callback" element={<AuthCallback />} />
             
             {/* Public routes - Only accessible when not authenticated */}
             <Route path="/login" element={

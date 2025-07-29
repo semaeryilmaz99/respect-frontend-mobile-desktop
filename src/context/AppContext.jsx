@@ -297,13 +297,18 @@ export const useAppContext = () => {
 
 // Selector hooks for specific state slices
 export const useAuth = () => {
-  const { state } = useAppContext()
+  const { state, actions } = useAppContext()
   return {
     user: state.user,
     isAuthenticated: state.isAuthenticated,
     token: state.token,
     loading: state.loading,
-    error: state.error
+    error: state.error,
+    // Auth actions
+    login: actions.login,
+    logout: actions.logout,
+    signup: actions.signup,
+    setUser: actions.setUser
   }
 }
 

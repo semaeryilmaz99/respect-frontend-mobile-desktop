@@ -1,21 +1,42 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useUI } from '../context/AppContext'
+import { useUI, useAppContext } from '../context/AppContext'
+import authService from '../api/authService'
 
 const Sidebar = () => {
   const navigate = useNavigate()
   const { sidebarOpen, closeSidebar } = useUI()
+  const { actions } = useAppContext()
 
   const handleNavigation = (path) => {
     navigate(path)
     closeSidebar() // Sidebar'ı kapat
   }
 
-  const handleLogout = () => {
-    // Çıkış işlemi - şimdilik console.log, ileride auth service eklenebilir
-    console.log('Çıkış yapılıyor...')
-    navigate('/login')
-    closeSidebar()
+  const handleLogout = async () => {
+    try {
+      console.log('🔐 Attempting logout with Supabase...')
+      
+      // Supabase logout
+      await authService.logout()
+      
+      // Context logout
+      actions.logout()
+      
+      console.log('✅ Logout successful')
+      
+      // Navigate to login
+      navigate('/login')
+      closeSidebar()
+      
+    } catch (error) {
+      console.error('❌ Logout error:', error)
+      
+      // Force logout even if API fails
+      actions.logout()
+      navigate('/login')
+      closeSidebar()
+    }
   }
 
   const menuItems = [

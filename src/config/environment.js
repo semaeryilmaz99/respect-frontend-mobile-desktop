@@ -1,8 +1,12 @@
 // Environment Configuration
 const config = {
-  // API Configuration
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
+  // API Configuration - Updated for Supabase
+  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'https://ghbsezysczrzqezoanav.supabase.co/rest/v1',
   WEBSOCKET_URL: import.meta.env.VITE_WEBSOCKET_URL || 'ws://localhost:8000/ws',
+  
+  // Supabase Configuration
+  SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL || 'https://ghbsezysczrzqezoanav.supabase.co',
+  SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoYnNlenlzemNyenFlem9hbmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3Nzk2MDMsImV4cCI6MjA2OTM1NTYwM30.sH27celBpFC48xPV5S3oDfY4yvJs59QNd_3qQKHp3Oc',
   
   // Authentication
   JWT_SECRET: import.meta.env.VITE_JWT_SECRET || 'dev-secret-key',

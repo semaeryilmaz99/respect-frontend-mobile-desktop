@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-// import { authService } from '../api' // Commented out for demo mode
+import { useAppContext } from '../context/AppContext'
+import authService from '../api/authService'
 
 const SignupPage = () => {
   const navigate = useNavigate()
+  const { actions } = useAppContext()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
@@ -25,53 +27,73 @@ const SignupPage = () => {
       return
     }
 
-    // Demo mode - directly navigate to feed
-    setLoading(true)
-    setError('')
-    
-    // Simulate loading for better UX
-    setTimeout(() => {
-      setLoading(false)
-      navigate('/feed')
-    }, 700)
-
-    /* API version - uncomment when backend is ready
     try {
       setLoading(true)
       setError('')
       
-      await authService.signup({
-        firstName,
-        lastName,
+      console.log('🔐 Attempting signup with Supabase...')
+      
+      const fullName = `${firstName} ${lastName}`
+      const username = email.split('@')[0] // Simple username generation
+      
+      const result = await authService.signup({
         email,
-        password
+        password,
+        fullName,
+        username
       })
       
-      // Navigate to feed page after successful signup
+      console.log('✅ Signup successful:', result)
+      
+      if (result.needsConfirmation) {
+        // Email confirmation required
+        setError('Email adresinizi onaylayın. Onay linki gönderildi.')
+        setLoading(false)
+        return
+      }
+      
+      // Set user in context
+      actions.setUser({
+        id: result.user.id,
+        email: result.user.email,
+        name: fullName,
+        respectBalance: 1000,
+        token: result.token
+      })
+      
+      // Complete onboarding
+      actions.completeOnboarding()
+      
+      // Navigate to feed
       navigate('/feed')
+      
     } catch (err) {
+      console.error('❌ Signup error:', err)
       setError(err.message || 'Kayıt olurken bir hata oluştu')
     } finally {
       setLoading(false)
     }
-    */
   }
 
-  const handleSpotifySignup = () => {
-    // Demo mode - directly navigate to feed
-    setLoading(true)
-    setError('')
-    
-    // Simulate loading for better UX
-    setTimeout(() => {
+  const handleSpotifySignup = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      
+      console.log('🎵 Attempting Spotify OAuth signup...')
+      
+      const result = await authService.spotifyLogin()
+      
+      console.log('✅ Spotify OAuth signup initiated:', result)
+      
+      // OAuth redirect will happen automatically
+      // User will be redirected back to /auth/callback
+      
+    } catch (err) {
+      console.error('❌ Spotify signup error:', err)
+      setError(err.message || 'Spotify ile kayıt olurken bir hata oluştu')
       setLoading(false)
-      navigate('/feed')
-    }, 800)
-    
-    /* Spotify OAuth version - uncomment when backend is ready
-    // Spotify OAuth logic will be implemented later
-    console.log('Spotify signup clicked')
-    */
+    }
   }
 
   return (
