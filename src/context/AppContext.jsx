@@ -12,6 +12,7 @@ const initialState = {
   // App state
   loading: false,
   error: null,
+  onboardingCompleted: false,
   
   // UI state
   sidebarOpen: false,
@@ -70,6 +71,10 @@ const appReducer = (state, action) => {
       
     case ACTIONS.CLEAR_ERROR:
       return { ...state, error: null }
+      
+    case ACTIONS.COMPLETE_ONBOARDING:
+      localStorage.setItem(config.STORAGE_KEYS.ONBOARDING_COMPLETED, 'true')
+      return { ...state, onboardingCompleted: true }
       
     // UI cases
     case ACTIONS.TOGGLE_SIDEBAR:
@@ -205,9 +210,13 @@ export const AppProvider = ({ children }) => {
       // Restore UI preferences
       const theme = localStorage.getItem(config.STORAGE_KEYS.THEME) || 'light'
       const language = localStorage.getItem(config.STORAGE_KEYS.LANGUAGE) || 'tr'
+      const onboardingCompleted = localStorage.getItem(config.STORAGE_KEYS.ONBOARDING_COMPLETED) === 'true'
       
       dispatch({ type: ACTIONS.SET_THEME, payload: theme })
       dispatch({ type: ACTIONS.SET_LANGUAGE, payload: language })
+      if (onboardingCompleted) {
+        dispatch({ type: ACTIONS.COMPLETE_ONBOARDING })
+      }
       
     } catch (error) {
       console.error('Failed to restore state from localStorage:', error)
@@ -260,7 +269,8 @@ export const AppProvider = ({ children }) => {
     }),
     removeNotification: (id) => dispatch({ type: ACTIONS.REMOVE_NOTIFICATION, payload: id }),
     markNotificationRead: (id) => dispatch({ type: ACTIONS.MARK_NOTIFICATION_READ, payload: id }),
-    setUnreadCount: (count) => dispatch({ type: ACTIONS.SET_UNREAD_COUNT, payload: count })
+    setUnreadCount: (count) => dispatch({ type: ACTIONS.SET_UNREAD_COUNT, payload: count }),
+    completeOnboarding: () => dispatch({ type: ACTIONS.COMPLETE_ONBOARDING })
   }
   
   const value = {

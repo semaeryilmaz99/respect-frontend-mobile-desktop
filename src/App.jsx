@@ -35,12 +35,10 @@ function App() {
             <ToastContainer />
         
         <Routes>
+            {/* Onboarding route - Special case without ProtectedRoute */}
+            <Route path="/onboarding" element={<OnboardingPage />} />
+            
             {/* Public routes - Only accessible when not authenticated */}
-            <Route path="/onboarding" element={
-              <ProtectedRoute requireAuth={false}>
-                <OnboardingPage />
-              </ProtectedRoute>
-            } />
             <Route path="/login" element={
               <ProtectedRoute requireAuth={false}>
                 <LoginPage />

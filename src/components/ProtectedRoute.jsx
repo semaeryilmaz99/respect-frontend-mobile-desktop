@@ -5,11 +5,16 @@ import LoadingSpinner from './LoadingSpinner'
 
 const ProtectedRoute = ({ children, requireAuth = true }) => {
   const { state } = useAppContext()
-  const { isAuthenticated, loading } = state
+  const { isAuthenticated, loading, onboardingCompleted } = state
 
   // Show loading spinner while checking authentication
   if (loading) {
     return <LoadingSpinner />
+  }
+
+  // If onboarding is not completed, always redirect to onboarding
+  if (!onboardingCompleted) {
+    return <Navigate to="/onboarding" replace />
   }
 
   // Redirect to login if authentication is required but user is not authenticated

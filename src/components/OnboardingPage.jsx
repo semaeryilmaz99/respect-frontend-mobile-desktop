@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
 
 const OnboardingPage = () => {
   const navigate = useNavigate()
+  const { actions } = useAppContext()
   const [currentStep, setCurrentStep] = useState(0)
 
   const steps = [
@@ -41,7 +43,8 @@ const OnboardingPage = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
-      // Navigate to login page when onboarding is completed
+      // Complete onboarding and navigate to login page
+      actions.completeOnboarding()
       navigate('/login')
     }
   }

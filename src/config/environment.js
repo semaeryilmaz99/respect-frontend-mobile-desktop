@@ -43,7 +43,8 @@ const config = {
     USER: 'user',
     THEME: 'theme',
     LANGUAGE: 'language',
-    LAST_VISITED: 'lastVisited'
+    LAST_VISITED: 'lastVisited',
+    ONBOARDING_COMPLETED: 'onboardingCompleted'
   }
 }
 
