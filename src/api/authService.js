@@ -58,7 +58,7 @@ const authService = {
     try {
       console.log('🔐 Attempting signup with Supabase...')
       
-      // 1. Supabase Auth ile user oluştur
+      // Sadece Supabase Auth ile user oluştur (trigger otomatik profile oluşturacak)
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -76,23 +76,7 @@ const authService = {
 
       console.log('✅ Auth signup successful:', data)
 
-      // 2. User profile oluştur (eğer user oluşturulduysa)
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            username: username,
-            full_name: fullName,
-            respect_balance: 1000
-          })
-
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          // Profile oluşturulamazsa bile auth başarılı sayılır
-        }
-      }
-
+      // Trigger otomatik olarak profile oluşturacak, manuel oluşturmaya gerek yok
       return {
         user: data.user,
         session: data.session,
