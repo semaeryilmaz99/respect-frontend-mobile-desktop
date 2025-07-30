@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import FavoriteButton from './FavoriteButton'
 
 const SongInfo = () => {
   const navigate = useNavigate()
@@ -42,6 +43,12 @@ const SongInfo = () => {
           <button className="send-respect-button" onClick={handleSendRespect}>
             Respect Gönder
           </button>
+          
+          <FavoriteButton 
+            songId="550e8400-e29b-41d4-a716-446655440002" 
+            initialFavoritesCount={342}
+            size="medium"
+          />
         </div>
       </div>
     </div>

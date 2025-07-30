@@ -1452,9 +1452,14 @@ html {
 
 .song-buttons {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
+}
+
+.song-buttons .favorite-button-container {
+  margin: 0;
 }
 
 .play-spotify-button {
@@ -3855,5 +3860,132 @@ html {
     background: #2d1b1b;
     border-color: #4a2a2a;
     color: #ff6b6b;
+  }
+}
+
+/* Favorite Button Styles - Respect Theme */
+.favorite-button-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.favorite-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: 2px solid #f9dc38;
+  border-radius: 25px;
+  background: transparent;
+  color: #1b262e;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 120px;
+  box-shadow: 0 2px 8px rgba(249, 220, 56, 0.2);
+}
+
+.favorite-button:hover {
+  background: #f9dc38;
+  color: #1b262e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(249, 220, 56, 0.3);
+}
+
+.favorite-button.favorited {
+  background: #f9dc38;
+  color: #1b262e;
+  box-shadow: 0 4px 15px rgba(249, 220, 56, 0.4);
+}
+
+.favorite-button.favorited:hover {
+  background: #f4d430;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(249, 220, 56, 0.5);
+}
+
+.favorite-button.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.favorite-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(249, 220, 56, 0.2);
+}
+
+.favorites-count {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.favorite-error {
+  color: #ef4444;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #fef2f2;
+  border-radius: 4px;
+  border: 1px solid #fecaca;
+}
+
+/* Favorite button size variants */
+.favorite-button-small {
+  font-size: 12px;
+  padding: 8px 16px;
+  min-width: 100px;
+}
+
+.favorite-button-medium {
+  font-size: 14px;
+  padding: 10px 20px;
+  min-width: 120px;
+}
+
+.favorite-button-large {
+  font-size: 16px;
+  padding: 12px 24px;
+  min-width: 140px;
+}
+
+/* Mobile responsive for favorite buttons */
+@media (max-width: 768px) {
+  .favorite-button {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: 110px;
+  }
+  
+  .favorite-button-medium {
+    padding: 8px 16px;
+    font-size: 13px;
+    min-width: 110px;
+  }
+  
+  .song-buttons {
+    gap: 8px;
+  }
+  
+  .song-buttons .favorite-button-container {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .favorite-button {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 100px;
+  }
+  
+  .song-buttons {
+    flex-direction: column;
+    gap: 8px;
   }
 }

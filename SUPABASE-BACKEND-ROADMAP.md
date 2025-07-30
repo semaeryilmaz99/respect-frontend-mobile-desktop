@@ -93,11 +93,97 @@ CREATE TABLE public.artists (
   created_at timestamp default now()
 );
 
--- songs tablosu  
-CREATE TABLE public.songs (
+-- songs tablosu (güncellenmiş yapı)
+CREATE TABLE IF NOT EXISTS public.songs (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
   artist_id uuid references artists(id),
+  album text,
+  duration integer,
+  cover_url text,
+  spotify_id text,
+  apple_music_id text,
+  total_respect bigint default 0,
+  favorites_count integer default 0,
+  created_at timestamp default now()
+);
+
+-- Eksik kolonları ekle (eğer yoksa)
+ALTER TABLE public.songs 
+ADD COLUMN IF NOT EXISTS album text,
+ADD COLUMN IF NOT EXISTS duration integer,
+ADD COLUMN IF NOT EXISTS spotify_id text,
+ADD COLUMN IF NOT EXISTS apple_music_id text,
+ADD COLUMN IF NOT EXISTS favorites_count integer default 0;
+
+-- song_favorites tablosu (kullanıcıların favori şarkıları)
+CREATE TABLE IF NOT EXISTS public.song_favorites (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade,
+  song_id uuid references songs(id) on delete cascade,
+  created_at timestamp default now(),
+  
+  -- Prevent duplicate favorites
+  UNIQUE(user_id, song_id)
+);
+
+-- songs tablosuna favorites_count kolonu ekle (eğer yoksa)
+ALTER TABLE public.songs 
+ADD COLUMN IF NOT EXISTS favorites_count integer default 0;
+
+-- Favori sayısını güncelleyen fonksiyon
+CREATE OR REPLACE FUNCTION update_song_favorites_count()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    UPDATE songs 
+    SET favorites_count = favorites_count + 1 
+    WHERE id = NEW.song_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE songs 
+    SET favorites_count = favorites_count - 1 
+    WHERE id = OLD.song_id;
+    RETURN OLD;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger oluştur
+DROP TRIGGER IF EXISTS trigger_update_song_favorites_count ON song_favorites;
+CREATE TRIGGER trigger_update_song_favorites_count
+    AFTER INSERT OR DELETE ON song_favorites
+    FOR EACH ROW
+    EXECUTE FUNCTION update_song_favorites_count();
+
+-- RLS Policies for song_favorites
+ALTER TABLE song_favorites ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own favorites
+CREATE POLICY "Users can view own favorites" ON song_favorites
+    FOR SELECT USING (auth.uid() = user_id);
+
+-- Users can add their own favorites
+CREATE POLICY "Users can add own favorites" ON song_favorites
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Users can remove their own favorites
+CREATE POLICY "Users can remove own favorites" ON song_favorites
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- Index for better performance
+CREATE INDEX IF NOT EXISTS idx_song_favorites_user_id ON song_favorites(user_id);
+CREATE INDEX IF NOT EXISTS idx_song_favorites_song_id ON song_favorites(song_id);
+
+-- Örnek şarkı verileri ekle (eğer songs tablosu boşsa)
+INSERT INTO public.songs (id, title, artist_id, album, duration, cover_url, total_respect, favorites_count) VALUES
+  ('550e8400-e29b-41d4-a716-446655440002', 'Gidiyorum', '550e8400-e29b-41d4-a716-446655440001', 'Gidiyorum', 240, '/src/assets/song/Image.png', 1247, 342),
+  ('550e8400-e29b-41d4-a716-446655440003', 'Sunset Boulevard', '550e8400-e29b-41d4-a716-446655440001', 'Sunset Boulevard', 280, '/src/assets/song/Image (1).png', 5247, 156),
+  ('550e8400-e29b-41d4-a716-446655440004', 'Küçük Bir Aşk Masalı', '550e8400-e29b-41d4-a716-446655440001', 'Küçük Bir Aşk Masalı', 265, '/src/assets/song/Image (2).png', 892, 89),
+  ('550e8400-e29b-41d4-a716-446655440005', 'Gül Pembe', '550e8400-e29b-41d4-a716-446655440001', 'Gül Pembe', 310, '/src/assets/song/Image (3).png', 2156, 234),
+  ('550e8400-e29b-41d4-a716-446655440006', 'Kaleidoscope', '550e8400-e29b-41d4-a716-446655440001', 'Kaleidoscope', 295, '/src/assets/song/Image (4).png', 1789, 167)
+ON CONFLICT (id) DO NOTHING;
   album_name text,
   cover_url text,
   duration_ms integer,
