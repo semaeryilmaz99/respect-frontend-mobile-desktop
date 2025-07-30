@@ -48,7 +48,8 @@ const config = {
     THEME: 'theme',
     LANGUAGE: 'language',
     LAST_VISITED: 'lastVisited',
-    ONBOARDING_COMPLETED: 'onboardingCompleted'
+    ONBOARDING_COMPLETED: 'onboardingCompleted',
+    PROFILE_COMPLETED: 'profileCompleted'
   }
 }
 

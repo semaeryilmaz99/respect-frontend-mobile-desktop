@@ -1,12 +1,86 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAppContext } from '../context/AppContext'
+import userService from '../api/userService'
 import Header from './Header'
 import UserProfile from './UserProfile'
 import UserStats from './UserStats'
 import UserTopArtists from './UserTopArtists'
 import UserTopSongs from './UserTopSongs'
 import BackButton from './common/BackButton'
+import LoadingSpinner from './LoadingSpinner'
 
 const UserPage = () => {
+  const navigate = useNavigate()
+  const { state } = useAppContext()
+  const { user } = state
+  
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  
+  const handleEditProfile = () => {
+    navigate('/profile/settings')
+  }
+  
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+      
+      try {
+        setLoading(true)
+        const profile = await userService.getProfile(user.id)
+        setUserData(profile)
+      } catch (error) {
+        console.error('Error fetching user profile:', error)
+        setError('Profil bilgileri yüklenirken hata oluştu')
+        
+        // Fallback to user data from context
+        setUserData({
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'kullanici',
+          bio: 'Profil bilgileri yüklenemedi.',
+          avatar_url: user.user_metadata?.avatar_url || '/src/assets/user/Image.png',
+          respect_balance: 1000
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUserProfile()
+  }, [user])
+  
+  // Loading state
+  if (loading) {
+    return <LoadingSpinner />
+  }
+  
+  // Error state
+  if (error && !userData) {
+    return (
+      <div className="user-page">
+        <Header />
+        <div className="error-message">
+          {error}
+        </div>
+      </div>
+    )
+  }
+  
+  // Use real user data or fallback to default
+  const displayUserData = userData || {
+    full_name: 'Alex Rodriguez',
+    username: 'alexrodriguez',
+    bio: 'Indie rock tutkunu. Sanatçıları desteklemeyi seven biri.',
+    avatar_url: '/src/assets/user/Image.png',
+    respect_balance: 2847
+  }
+  
   return (
     <div className="user-page">
       <div className="page-header mobile-only">
@@ -16,8 +90,8 @@ const UserPage = () => {
       
       {/* Mobile Layout - Orijinal sıra */}
       <div className="user-content mobile-only">
-        <UserProfile />
-        <UserStats />
+        <UserProfile userData={displayUserData} />
+        <UserStats userData={displayUserData} />
         <UserTopArtists />
         <UserTopSongs />
       </div>
@@ -28,19 +102,19 @@ const UserPage = () => {
         <div className="desktop-user-profile">
           <div className="desktop-profile-content">
             <div className="desktop-profile-avatar">
-              <img src="/src/assets/user/Image.png" alt="Alex Rodriguez" />
+              <img src={displayUserData.avatar_url} alt={displayUserData.full_name} />
             </div>
             <div className="desktop-profile-info">
-              <h1 className="desktop-user-name">Alex Rodriguez</h1>
-              <p className="desktop-user-bio">Indie rock tutkunu. Sanatçıları desteklemeyi seven biri.</p>
+              <h1 className="desktop-user-name">{displayUserData.full_name}</h1>
+              <p className="desktop-user-bio">{displayUserData.bio}</p>
               
               <div className="desktop-profile-stats">
                 <div className="desktop-respect-count">
-                  <span className="respect-number">2,847</span>
+                  <span className="respect-number">{displayUserData.respect_balance?.toLocaleString() || '2,847'}</span>
                   <span className="respect-label">Toplam Respect</span>
                   <span className="respect-goal">Gole</span>
                 </div>
-                <button className="desktop-edit-profile-btn">
+                <button className="desktop-edit-profile-btn" onClick={handleEditProfile}>
                   Profil Düzenle
                 </button>
               </div>

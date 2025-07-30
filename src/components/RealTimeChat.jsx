@@ -149,7 +149,7 @@ const RealTimeChat = ({ roomId = 'general', roomType = 'artist' }) => {
               <div className="chat-input-avatar">
                 <img 
                   src={currentUser?.user_metadata?.avatar_url || '/src/assets/user/Image.png'} 
-                  alt="Senin avatarın" 
+                  alt={currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'Kullanıcı'} 
                 />
               </div>
               <input 

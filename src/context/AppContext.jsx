@@ -10,9 +10,10 @@ const initialState = {
   token: null,
   
   // App state
-  loading: false,
+  loading: true, // Start with loading true
   error: null,
   onboardingCompleted: false,
+  profileCompleted: false,
   
   // UI state
   sidebarOpen: false,
@@ -48,6 +49,13 @@ const appReducer = (state, action) => {
         token: action.payload?.token || state.token
       }
       
+    case ACTIONS.UPDATE_USER:
+      return {
+        ...state,
+        user: { ...state.user, ...action.payload },
+        isAuthenticated: !!state.user
+      }
+      
     case ACTIONS.LOGOUT:
       localStorage.removeItem(config.STORAGE_KEYS.AUTH_TOKEN)
       localStorage.removeItem(config.STORAGE_KEYS.USER)
@@ -75,6 +83,10 @@ const appReducer = (state, action) => {
     case ACTIONS.COMPLETE_ONBOARDING:
       localStorage.setItem(config.STORAGE_KEYS.ONBOARDING_COMPLETED, 'true')
       return { ...state, onboardingCompleted: true }
+      
+    case ACTIONS.COMPLETE_PROFILE:
+      localStorage.setItem(config.STORAGE_KEYS.PROFILE_COMPLETED, 'true')
+      return { ...state, profileCompleted: true }
       
     // UI cases
     case ACTIONS.TOGGLE_SIDEBAR:
@@ -196,14 +208,20 @@ export const AppProvider = ({ children }) => {
   // Initialize state from localStorage
   useEffect(() => {
     try {
+      console.log('🔄 Initializing app state from localStorage...')
+      
       // Restore user session
       const token = localStorage.getItem(config.STORAGE_KEYS.AUTH_TOKEN)
       const user = localStorage.getItem(config.STORAGE_KEYS.USER)
       
+      console.log('🔍 Found token:', !!token, 'Found user:', !!user)
+      
       if (token && user) {
+        const userData = JSON.parse(user)
+        console.log('👤 Restoring user session:', userData)
         dispatch({
           type: ACTIONS.SET_USER,
-          payload: { ...JSON.parse(user), token }
+          payload: { ...userData, token }
         })
       }
       
@@ -211,15 +229,30 @@ export const AppProvider = ({ children }) => {
       const theme = localStorage.getItem(config.STORAGE_KEYS.THEME) || 'light'
       const language = localStorage.getItem(config.STORAGE_KEYS.LANGUAGE) || 'tr'
       const onboardingCompleted = localStorage.getItem(config.STORAGE_KEYS.ONBOARDING_COMPLETED) === 'true'
+      const profileCompleted = localStorage.getItem(config.STORAGE_KEYS.PROFILE_COMPLETED) === 'true'
+      
+      console.log('⚙️ UI preferences:', { theme, language, onboardingCompleted, profileCompleted })
       
       dispatch({ type: ACTIONS.SET_THEME, payload: theme })
       dispatch({ type: ACTIONS.SET_LANGUAGE, payload: language })
       if (onboardingCompleted) {
+        console.log('✅ Completing onboarding')
         dispatch({ type: ACTIONS.COMPLETE_ONBOARDING })
       }
+      if (profileCompleted) {
+        console.log('✅ Completing profile')
+        dispatch({ type: ACTIONS.COMPLETE_PROFILE })
+      }
+      
+      console.log('✅ App state initialization complete')
+      
+      // Set loading to false after initialization
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false })
       
     } catch (error) {
-      console.error('Failed to restore state from localStorage:', error)
+      console.error('❌ Failed to restore state from localStorage:', error)
+      // Set loading to false even if there's an error
+      dispatch({ type: ACTIONS.SET_LOADING, payload: false })
     }
   }, [])
   
@@ -227,6 +260,7 @@ export const AppProvider = ({ children }) => {
   const actions = {
     // Auth actions
     setUser: (user) => dispatch({ type: ACTIONS.SET_USER, payload: user }),
+    updateUser: (updates) => dispatch({ type: ACTIONS.UPDATE_USER, payload: updates }),
     logout: () => dispatch({ type: ACTIONS.LOGOUT }),
     setLoading: (loading) => dispatch({ type: ACTIONS.SET_LOADING, payload: loading }),
     setError: (error) => dispatch({ type: ACTIONS.SET_ERROR, payload: error }),
@@ -270,7 +304,8 @@ export const AppProvider = ({ children }) => {
     removeNotification: (id) => dispatch({ type: ACTIONS.REMOVE_NOTIFICATION, payload: id }),
     markNotificationRead: (id) => dispatch({ type: ACTIONS.MARK_NOTIFICATION_READ, payload: id }),
     setUnreadCount: (count) => dispatch({ type: ACTIONS.SET_UNREAD_COUNT, payload: count }),
-    completeOnboarding: () => dispatch({ type: ACTIONS.COMPLETE_ONBOARDING })
+    completeOnboarding: () => dispatch({ type: ACTIONS.COMPLETE_ONBOARDING }),
+    completeProfile: () => dispatch({ type: ACTIONS.COMPLETE_PROFILE })
   }
   
   const value = {

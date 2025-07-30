@@ -1,15 +1,58 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useUI } from '../context/AppContext'
+import { useUI, useAppContext } from '../context/AppContext'
+import userService from '../api/userService'
 
 const Header = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { toggleSidebar } = useUI()
+  const { state } = useAppContext()
+  const { user } = state
+  
+  const [userData, setUserData] = useState(null)
+  
   const isFeedPage = location.pathname === '/feed'
   const isSongPage = location.pathname.startsWith('/song')
   const isUserPage = location.pathname.startsWith('/user') || location.pathname === '/profile'
   const isSendRespectPage = location.pathname === '/send-respect'
+  
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        return
+      }
+      
+      try {
+        const profile = await userService.getProfile(user.id)
+        setUserData(profile)
+      } catch (error) {
+        console.error('Error fetching user profile for header:', error)
+        // Fallback to user data from context
+        setUserData({
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'kullanici',
+          avatar_url: user.user_metadata?.avatar_url || '/src/assets/user/Image.png'
+        })
+      }
+    }
+    
+    fetchUserProfile()
+  }, [user])
+
+  // Update userData when user context changes (e.g., after profile update)
+  useEffect(() => {
+    if (user && user.user_metadata) {
+      setUserData(prevData => ({
+        ...prevData,
+        full_name: user.user_metadata.full_name || prevData?.full_name,
+        username: user.user_metadata.username || prevData?.username,
+        avatar_url: user.user_metadata.avatar_url || prevData?.avatar_url
+      }))
+      console.log('🔄 Header user data updated from context:', user.user_metadata)
+    }
+  }, [user?.user_metadata])
   
   return (
     <header className="header">
@@ -55,7 +98,10 @@ const Header = () => {
         )}
         
         <button className="user-avatar" onClick={() => navigate('/profile')}>
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" alt="User" />
+          <img 
+            src={userData?.avatar_url || '/src/assets/user/Image.png'} 
+            alt={userData?.full_name || 'Kullanıcı'} 
+          />
         </button>
       </div>
       

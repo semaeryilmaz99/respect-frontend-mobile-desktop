@@ -1,18 +1,30 @@
 import React from 'react'
+import { useAppContext } from '../context/AppContext'
 
-const UserProfile = () => {
+const UserProfile = ({ userData }) => {
+  const { state } = useAppContext()
+  const { user } = state
+  
+  // Use passed userData or fallback to context user
+  const displayData = userData || {
+    full_name: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Kullanıcı',
+    username: user?.user_metadata?.username || user?.email?.split('@')[0] || 'kullanici',
+    bio: 'Profil bilgileri yüklenemedi.',
+    avatar_url: user?.user_metadata?.avatar_url || '/src/assets/user/Image.png'
+  }
+  
   return (
     <div className="user-profile">
       <div className="user-profile-image">
-        <img src="/src/assets/user/Image.png" alt="Emre Demir" />
+        <img src={displayData.avatar_url} alt={displayData.full_name} />
       </div>
       
       <div className="user-info">
-        <h2 className="user-name">Emre Demir</h2>
-        <p className="user-handle">@emre_demir</p>
+        <h2 className="user-name">{displayData.full_name}</h2>
+        <p className="user-handle">@{displayData.username}</p>
         
         <p className="user-bio">
-          İstanbul'dan şarkıcı-besteci. Ruha dokunan müzikler yaratma konusunda tutkulu.
+          {displayData.bio}
         </p>
       </div>
     </div>

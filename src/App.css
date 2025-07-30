@@ -280,8 +280,17 @@ body {
   object-fit: cover;
 }
 
+.card-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
 .card-button {
-  width: 100%;
+  flex: 1;
+  min-width: 120px;
   padding: 12px 16px;
   border: none;
   background-color: #fbdb3a;
@@ -303,6 +312,18 @@ body {
 .card-button:active {
   background-color: #ffe487;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile optimization for card actions */
+@media (max-width: 768px) {
+  .card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .card-button {
+    width: 100%;
+  }
 }
 
 /* Color variations removed - all cards now have white background with border */
@@ -2967,7 +2988,7 @@ html {
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
-  z-index: 998;
+  z-index: 1001;
 }
 
 .sidebar-overlay.active {
@@ -2985,7 +3006,7 @@ html {
   background: linear-gradient(135deg, #f9dc38 0%, #ffffff 100%);
   transform: translateX(-100%);
   transition: transform 0.3s ease;
-  z-index: 999;
+  z-index: 1002;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -3214,5 +3235,625 @@ html {
   /* Feed sayfasında mobile chat için alan bırak */
   .feed-page {
     padding-bottom: 300px;
+  }
+}
+
+/* ===========================================
+   PROFILE SETTINGS PAGE STYLES
+   =========================================== */
+
+.profile-settings-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f9dc38 0%, #ffffff 100%);
+  padding-bottom: 80px;
+}
+
+.profile-settings-content {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.settings-container {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.settings-title {
+  color: #1b262e;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 24px 0;
+  text-align: center;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section-title {
+  color: #1b262e;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.section-description {
+  color: #6c757d;
+  font-size: 14px;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+/* Message Styles */
+.message {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Avatar Upload */
+.avatar-upload {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.avatar-preview {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #f9dc38;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.avatar-preview:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(249, 220, 56, 0.3);
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.avatar-preview:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.avatar-upload-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.avatar-upload-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #1b262e;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1b262e;
+  background: white;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #f9dc38;
+  box-shadow: 0 0 0 3px rgba(249, 220, 56, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Card Details Row */
+.card-details-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Save Buttons */
+.save-btn {
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+}
+
+.save-btn.primary {
+  background: linear-gradient(135deg, #f9dc38 0%, #f0c800 100%);
+  color: #1b262e;
+}
+
+.save-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 220, 56, 0.3);
+}
+
+.save-btn.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.save-btn.secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+}
+
+.save-btn.secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
+}
+
+.save-btn.secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.save-btn.complete-profile {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  margin-top: 16px;
+  font-size: 18px;
+  padding: 16px 24px;
+}
+
+.save-btn.complete-profile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+.save-btn.complete-profile:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Security Section */
+.security-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.security-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  color: #1b262e;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.security-btn:hover {
+  border-color: #f9dc38;
+  background-color: #fefefe;
+  transform: translateX(4px);
+}
+
+/* Danger Zone */
+.danger-zone {
+  border-top: 2px solid #dc3545;
+  padding-top: 24px;
+}
+
+.danger-zone .section-title {
+  color: #dc3545;
+}
+
+.danger-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: white;
+  border: 2px solid #dc3545;
+  border-radius: 8px;
+  color: #dc3545;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.danger-btn:hover {
+  background-color: #dc3545;
+  color: white;
+  transform: translateX(4px);
+}
+
+/* Mobile Optimization */
+@media (max-width: 768px) {
+  .profile-settings-content {
+    padding: 16px;
+  }
+  
+  .settings-container {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .settings-title {
+    font-size: 20px;
+  }
+  
+  .card-details-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .security-btn,
+  .danger-btn {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .settings-container {
+    background: #2d3748;
+    color: white;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    background: #4a5568;
+    border-color: #718096;
+    color: white;
+  }
+  
+  .security-btn {
+    background: #4a5568;
+    border-color: #718096;
+    color: white;
+  }
+  
+  .security-btn:hover {
+    background: #2d3748;
+  }
+}
+
+/* ===========================================
+   FOLLOW BUTTON STYLES
+   =========================================== */
+
+.follow-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.follow-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 2px solid #f9dc38;
+  border-radius: 25px;
+  background: white;
+  color: #1b262e;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.follow-button:hover {
+  background: #f9dc38;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 220, 56, 0.3);
+}
+
+.follow-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(249, 220, 56, 0.2);
+}
+
+.follow-button.following {
+  background: #f9dc38;
+  color: #1b262e;
+  border-color: #f0c800;
+}
+
+.follow-button.following:hover {
+  background: #f0c800;
+  border-color: #e6b800;
+}
+
+.follow-button.loading {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.follow-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.follow-icon {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.follow-text {
+  font-weight: 600;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.followers-count {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.follow-error {
+  font-size: 12px;
+  color: #dc3545;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* Size variants */
+.follow-button.follow-btn-small {
+  padding: 8px 16px;
+  font-size: 12px;
+}
+
+.follow-button.follow-btn-small .follow-icon {
+  font-size: 14px;
+}
+
+.follow-button.follow-btn-large {
+  padding: 16px 28px;
+  font-size: 16px;
+}
+
+.follow-button.follow-btn-large .follow-icon {
+  font-size: 18px;
+}
+
+/* Artist page specific styles */
+.artist-header .follow-button {
+  margin-top: 16px;
+}
+
+.artist-card .follow-button {
+  margin-top: 12px;
+}
+
+.artist-actions {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.artist-buttons {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.artist-buttons .send-respect-button {
+  background: linear-gradient(135deg, #f9dc38 0%, #f0c800 100%);
+  color: #1b262e;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.artist-buttons .send-respect-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(249, 220, 56, 0.3);
+}
+
+.artist-buttons .send-respect-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(249, 220, 56, 0.2);
+}
+
+/* Mobile optimization for artist buttons */
+@media (max-width: 768px) {
+  .artist-buttons {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .artist-buttons .send-respect-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .follow-button {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+  
+  .follow-button.follow-btn-large {
+    padding: 14px 24px;
+    font-size: 15px;
+  }
+  
+  .followers-count {
+    font-size: 11px;
+  }
+}
+
+/* Error message styles */
+.error-message {
+  text-align: center;
+  padding: 20px;
+  margin: 20px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 8px;
+  color: #c33;
+  font-weight: 500;
+}
+
+/* Avatar loading styles */
+.avatar-loading {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #666;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .follow-button {
+    background: #2d3748;
+    color: white;
+    border-color: #f9dc38;
+  }
+  
+  .follow-button:hover {
+    background: #f9dc38;
+    color: #1b262e;
+  }
+  
+  .follow-button.following {
+    background: #f9dc38;
+    color: #1b262e;
+  }
+  
+  .followers-count {
+    color: #a0aec0;
+  }
+  
+  .error-message {
+    background: #2d1b1b;
+    border-color: #4a2a2a;
+    color: #ff6b6b;
   }
 }

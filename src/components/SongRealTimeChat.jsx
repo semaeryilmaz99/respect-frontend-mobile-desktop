@@ -1,7 +1,36 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useAppContext } from '../context/AppContext'
+import userService from '../api/userService'
 
 const SongRealTimeChat = () => {
   const [isOpen, setIsOpen] = useState(true)
+  const [userData, setUserData] = useState(null)
+  const { state } = useAppContext()
+  const { user } = state
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        return
+      }
+      
+      try {
+        const profile = await userService.getProfile(user.id)
+        setUserData(profile)
+      } catch (error) {
+        console.error('Error fetching user profile for song chat:', error)
+        // Fallback to user data from context
+        setUserData({
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'kullanici',
+          avatar_url: user.user_metadata?.avatar_url || '/src/assets/user/Image.png'
+        })
+      }
+    }
+    
+    fetchUserProfile()
+  }, [user])
 
   const chatMessages = [
     {
@@ -13,9 +42,9 @@ const SongRealTimeChat = () => {
     },
     {
       id: 2,
-      sender: "Sen",
+      sender: userData?.full_name || "Sen",
       message: "Kesinlikle katılıyorum, çok güçlü bir şarkı.",
-      avatar: "/src/assets/user/Image (1).png",
+      avatar: userData?.avatar_url || "/src/assets/user/Image.png",
       isOwn: true
     }
   ]
@@ -51,7 +80,10 @@ const SongRealTimeChat = () => {
         
         <div className="chat-input-container">
           <div className="chat-input-avatar">
-            <img src="/src/assets/user/Image (2).png" alt="Senin avatarın" />
+            <img 
+              src={userData?.avatar_url || '/src/assets/user/Image.png'} 
+              alt={userData?.full_name || 'Kullanıcı'} 
+            />
           </div>
           <input 
             type="text" 

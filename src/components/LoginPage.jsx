@@ -36,8 +36,17 @@ const LoginPage = () => {
       // Complete onboarding
       actions.completeOnboarding()
       
-      // Navigate to feed
-      navigate('/feed')
+      // Check if user has completed profile
+      const hasProfile = result.user.user_metadata?.full_name && 
+                        result.user.user_metadata?.username
+      
+      if (hasProfile) {
+        // User has profile, go to feed
+        navigate('/feed')
+      } else {
+        // New user, go to profile settings
+        navigate('/profile/settings')
+      }
       
     } catch (err) {
       console.error('❌ Login error:', err)

@@ -43,16 +43,48 @@ const OnboardingPage = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
     } else {
+      // Clear any existing auth data when starting fresh
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('user')
+      localStorage.removeItem('profileCompleted')
+      
       // Complete onboarding and navigate to login page
       actions.completeOnboarding()
+      console.log('✅ Onboarding completed, navigating to login')
       navigate('/login')
     }
+  }
+
+  const handleClearStorage = () => {
+    localStorage.clear()
+    window.location.reload()
   }
 
   const currentStepData = steps[currentStep]
 
   return (
     <div className="onboarding-page">
+      {/* Debug button - only in development */}
+      {import.meta.env.DEV && (
+        <button 
+          onClick={handleClearStorage}
+          style={{
+            position: 'fixed',
+            top: '10px',
+            right: '10px',
+            zIndex: 1000,
+            padding: '8px 12px',
+            background: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '12px'
+          }}
+        >
+          🗑️ Clear Storage
+        </button>
+      )}
+
       {/* Progress Indicators */}
       <div className="progress-indicators">
         {steps.map((_, index) => (
@@ -98,25 +130,27 @@ const OnboardingPage = () => {
           </div>
         )}
 
-        {/* Text Content */}
-        <div className={`text-content ${currentStep === 2 ? 'text-content-small-margin' : ''}`}>
-          <h1 className={`step-title ${currentStep === 2 ? 'step-title-large' : ''}`}>{currentStepData.title}</h1>
-          <p className="step-subtitle">{currentStepData.subtitle}</p>
-        </div>
-
-        {/* Step 3: Community Illustration */}
+        {/* Step 3: Community Image */}
         {currentStep === 2 && (
-          <div className="community-illustration">
-            <div className="community-image">
-              <img src="/src/assets/onb-3.png" alt="Community Illustration" />
+          <div className="step-icon">
+            <div className="onb-hero-image">
+              <img src="/src/assets/onb-3.png" alt="Community" />
             </div>
           </div>
         )}
 
-        {/* Next Button */}
-        <button className="next-button" onClick={handleNext}>
-          {currentStepData.buttonText}
-        </button>
+        {/* Content */}
+        <div className="step-content">
+          <h1 className="step-title">{currentStepData.title}</h1>
+          <p className="step-subtitle">{currentStepData.subtitle}</p>
+        </div>
+
+        {/* Action Button */}
+        <div className="step-actions">
+          <button className="next-button" onClick={handleNext}>
+            {currentStepData.buttonText}
+          </button>
+        </div>
       </div>
     </div>
   )

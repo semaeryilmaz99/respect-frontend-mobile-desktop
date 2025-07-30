@@ -1,12 +1,60 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUI, useAppContext } from '../context/AppContext'
 import authService from '../api/authService'
+import userService from '../api/userService'
 
 const Sidebar = () => {
   const navigate = useNavigate()
   const { sidebarOpen, closeSidebar } = useUI()
-  const { actions } = useAppContext()
+  const { state, actions } = useAppContext()
+  const { user } = state
+  
+  const [userData, setUserData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  // Fetch user profile data
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) {
+        setLoading(false)
+        return
+      }
+      
+      try {
+        setLoading(true)
+        const profile = await userService.getProfile(user.id)
+        setUserData(profile)
+        console.log('✅ Sidebar user data loaded:', profile)
+      } catch (error) {
+        console.error('Error fetching user profile for sidebar:', error)
+        // Fallback to user data from context
+        setUserData({
+          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Kullanıcı',
+          username: user.user_metadata?.username || user.email?.split('@')[0] || 'kullanici',
+          avatar_url: user.user_metadata?.avatar_url || '/src/assets/user/Image.png',
+          respect_balance: user.user_metadata?.respect_balance || 1000
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUserProfile()
+  }, [user])
+
+  // Update userData when user context changes (e.g., after profile update)
+  useEffect(() => {
+    if (user && user.user_metadata) {
+      setUserData(prevData => ({
+        ...prevData,
+        full_name: user.user_metadata.full_name || prevData?.full_name,
+        username: user.user_metadata.username || prevData?.username,
+        avatar_url: user.user_metadata.avatar_url || prevData?.avatar_url
+      }))
+      console.log('🔄 Sidebar user data updated from context:', user.user_metadata)
+    }
+  }, [user?.user_metadata])
 
   const handleNavigation = (path) => {
     navigate(path)
@@ -62,8 +110,8 @@ const Sidebar = () => {
     },
     {
       label: 'Profil Ayarları',
-      path: '/profile',
-      action: () => handleNavigation('/profile')
+      path: '/profile/settings',
+      action: () => handleNavigation('/profile/settings')
     },
     {
       label: 'Çıkış',
@@ -104,11 +152,24 @@ const Sidebar = () => {
         <div className="sidebar-footer">
           <div className="user-info">
             <div className="user-avatar">
-              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face" alt="User" />
+              {loading ? (
+                <div className="avatar-loading">⏳</div>
+              ) : (
+                <img 
+                  src={userData?.avatar_url || user?.user_metadata?.avatar_url || '/src/assets/user/Image.png'} 
+                  alt={userData?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Kullanıcı'} 
+                  onLoad={() => console.log('✅ Sidebar avatar loaded:', userData?.avatar_url)}
+                  onError={() => console.log('❌ Sidebar avatar failed to load:', userData?.avatar_url)}
+                />
+              )}
             </div>
             <div className="user-details">
-              <p className="user-name">Kullanıcı Adı</p>
-              <p className="user-respect">1,247 Respect</p>
+              <p className="user-name">
+                {loading ? 'Yükleniyor...' : (userData?.full_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Kullanıcı')}
+              </p>
+              <p className="user-respect">
+                {loading ? '...' : `${userData?.respect_balance?.toLocaleString() || user?.user_metadata?.respect_balance || '1,000'} Respect`}
+              </p>
             </div>
           </div>
         </div>

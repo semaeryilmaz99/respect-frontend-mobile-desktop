@@ -43,8 +43,17 @@ const AuthCallback = () => {
           // Complete onboarding if not done
           actions.completeOnboarding()
 
-          // Redirect to feed
-          navigate('/feed')
+          // Check if user has completed profile
+          const hasProfile = user.user_metadata?.full_name && 
+                           user.user_metadata?.username
+          
+          if (hasProfile) {
+            // User has profile, go to feed
+            navigate('/feed')
+          } else {
+            // New user, go to profile settings
+            navigate('/profile/settings')
+          }
         } else {
           // No session, redirect to login
           navigate('/login')

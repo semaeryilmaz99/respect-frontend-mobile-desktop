@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import FollowButton from './FollowButton'
 
 const FeedCard = ({ type, title, buttonText, profileImage, artistId, songId, userId }) => {
   const navigate = useNavigate()
@@ -85,9 +86,20 @@ const FeedCard = ({ type, title, buttonText, profileImage, artistId, songId, use
           </div>
         </div>
         
-        <button className="card-button" onClick={handleButtonClick}>
-          {buttonText}
-        </button>
+        <div className="card-actions">
+          <button className="card-button" onClick={handleButtonClick}>
+            {buttonText}
+          </button>
+          
+          {/* Show follow button for trending artist cards */}
+          {type === 'trending-artist' && (
+            <FollowButton 
+              artistId={artistId || '550e8400-e29b-41d4-a716-446655440001'} 
+              artistName={title.split('-')[1]?.trim() || 'Sanatçı'}
+              size="small"
+            />
+          )}
+        </div>
       </div>
     </div>
   )

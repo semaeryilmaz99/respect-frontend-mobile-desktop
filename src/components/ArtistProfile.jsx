@@ -1,5 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import FollowButton from './FollowButton'
 
 const ArtistProfile = () => {
   const navigate = useNavigate()
@@ -32,9 +33,18 @@ const ArtistProfile = () => {
           Sezen Aksu, Türk pop müziğinin efsanevi sanatçısıdır. Etkileyici sesi ve duygusal şarkılarıyla milyonlarca insanın kalbine dokunmuş, Türk müziğinin vazgeçilmez isimlerinden biri olmuştur.
         </p>
         
-        <button className="send-respect-button" onClick={handleSendRespect}>
-          Respect Gönder
-        </button>
+        <div className="artist-buttons">
+          <button className="send-respect-button" onClick={handleSendRespect}>
+            Respect Gönder
+          </button>
+          
+          <FollowButton 
+            artistId="550e8400-e29b-41d4-a716-446655440001" 
+            artistName="Sezen Aksu"
+            initialFollowersCount={1247}
+            size="medium"
+          />
+        </div>
       </div>
     </div>
   )

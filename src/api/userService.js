@@ -1,126 +1,87 @@
-import api from '../utils/axios'
+import { supabase } from '../config/supabase'
 
-// User service
-const userService = {
-  // Get user by ID
-  getUserById: async (userId) => {
-    const response = await api.get(`/users/${userId}`)
-    return response
+export const userService = {
+  // Check if username is available
+  checkUsernameAvailability: async (username, excludeUserId = null) => {
+    try {
+      console.log('🔍 Checking username availability:', username)
+      
+      let query = supabase
+        .from('profiles')
+        .select('id')
+        .eq('username', username)
+      
+      if (excludeUserId) {
+        query = query.neq('id', excludeUserId)
+      }
+      
+      const { data, error } = await query.single()
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        throw error
+      }
+
+      const isAvailable = !data
+      console.log('✅ Username availability:', isAvailable)
+      return isAvailable
+    } catch (error) {
+      console.error('❌ Check username availability error:', error)
+      throw error
+    }
   },
 
   // Update user profile
-  updateProfile: async (userData) => {
-    const response = await api.put('/users/profile', userData)
-    return response
-  },
+  updateProfile: async (userId, profileData) => {
+    try {
+      console.log('👤 Updating profile for user:', userId)
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          username: profileData.username,
+          full_name: profileData.full_name,
+          bio: profileData.bio,
+          avatar_url: profileData.avatar_url,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+        .select()
+        .single()
 
-  // Upload profile avatar
-  uploadAvatar: async (imageFile) => {
-    const formData = new FormData()
-    formData.append('avatar', imageFile)
-    
-    const response = await api.post('/users/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          throw new Error('Bu kullanıcı adı zaten kullanılıyor')
+        }
+        throw error
       }
-    })
-    return response
+
+      console.log('✅ Profile updated successfully:', data)
+      return data
+    } catch (error) {
+      console.error('❌ Update profile error:', error)
+      throw error
+    }
   },
 
-  // Get user's top artists
-  getUserTopArtists: async (userId, timeframe = 'all', limit = 10) => {
-    const response = await api.get(`/users/${userId}/top-artists?timeframe=${timeframe}&limit=${limit}`)
-    return response
-  },
+  // Get user profile
+  getProfile: async (userId) => {
+    try {
+      console.log('👤 Getting profile for user:', userId)
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-  // Get user's top songs
-  getUserTopSongs: async (userId, timeframe = 'all', limit = 10) => {
-    const response = await api.get(`/users/${userId}/top-songs?timeframe=${timeframe}&limit=${limit}`)
-    return response
-  },
+      if (error) throw error
 
-  // Get user's stats
-  getUserStats: async (userId) => {
-    const response = await api.get(`/users/${userId}/stats`)
-    return response
-  },
-
-  // Get user's respect history
-  getUserRespectHistory: async (userId, page = 1, limit = 20) => {
-    const response = await api.get(`/users/${userId}/respect-history?page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Follow/unfollow user
-  toggleFollowUser: async (userId) => {
-    const response = await api.post(`/users/${userId}/follow`)
-    return response
-  },
-
-  // Get user's followers
-  getUserFollowers: async (userId, page = 1, limit = 20) => {
-    const response = await api.get(`/users/${userId}/followers?page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Get user's following
-  getUserFollowing: async (userId, page = 1, limit = 20) => {
-    const response = await api.get(`/users/${userId}/following?page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Search users
-  searchUsers: async (query, page = 1, limit = 20) => {
-    const response = await api.get(`/users/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Get user's playlists
-  getUserPlaylists: async (userId, page = 1, limit = 20) => {
-    const response = await api.get(`/users/${userId}/playlists?page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Create playlist
-  createPlaylist: async (playlistData) => {
-    const response = await api.post('/users/playlists', playlistData)
-    return response
-  },
-
-  // Update playlist
-  updatePlaylist: async (playlistId, playlistData) => {
-    const response = await api.put(`/users/playlists/${playlistId}`, playlistData)
-    return response
-  },
-
-  // Delete playlist
-  deletePlaylist: async (playlistId) => {
-    const response = await api.delete(`/users/playlists/${playlistId}`)
-    return response
-  },
-
-  // Get user notifications
-  getUserNotifications: async (page = 1, limit = 20) => {
-    const response = await api.get(`/users/notifications?page=${page}&limit=${limit}`)
-    return response
-  },
-
-  // Mark notification as read
-  markNotificationAsRead: async (notificationId) => {
-    const response = await api.post(`/users/notifications/${notificationId}/read`)
-    return response
-  },
-
-  // Update user settings
-  updateSettings: async (settings) => {
-    const response = await api.put('/users/settings', settings)
-    return response
-  },
-
-  // Get user settings
-  getUserSettings: async () => {
-    const response = await api.get('/users/settings')
-    return response
+      console.log('✅ Profile fetched successfully:', data)
+      return data
+    } catch (error) {
+      console.error('❌ Get profile error:', error)
+      throw error
+    }
   }
 }
 

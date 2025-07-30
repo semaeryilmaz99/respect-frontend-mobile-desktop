@@ -17,6 +17,7 @@ import ArtistPage from './components/ArtistPage'
 import SongPage from './components/SongPage'
 import SendRespectPage from './components/SendRespectPage'
 import UserPage from './components/UserPage'
+import ProfileSettingsPage from './components/ProfileSettingsPage'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -93,6 +94,11 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <UserPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/settings" element={
+              <ProtectedRoute requireAuth={true}>
+                <ProfileSettingsPage />
               </ProtectedRoute>
             } />
           
