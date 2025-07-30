@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { favoriteService } from '../api/favoriteService'
+import feedService from '../api/feedService'
 
 const FavoriteButton = ({ 
   songId, 
@@ -79,6 +80,16 @@ const FavoriteButton = ({
       // Update local state
       setIsFavorited(data.favorited)
       setFavoritesCount(prev => data.favorited ? prev + 1 : prev - 1)
+
+      // Feed item oluştur (sadece favoriye eklendiğinde)
+      if (data.favorited) {
+        try {
+          await feedService.createSongFavoritedFeedItem(songId)
+          console.log('✅ Feed item created for song favorite')
+        } catch (error) {
+          console.error('❌ Feed item creation failed:', error)
+        }
+      }
 
       console.log(`✅ Favorite toggled for song ${songId}:`, data)
     } catch (error) {

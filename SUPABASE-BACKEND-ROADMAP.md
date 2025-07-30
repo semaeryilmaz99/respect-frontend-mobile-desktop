@@ -184,6 +184,91 @@ INSERT INTO public.songs (id, title, artist_id, album, duration, cover_url, tota
   ('550e8400-e29b-41d4-a716-446655440005', 'Gül Pembe', '550e8400-e29b-41d4-a716-446655440001', 'Gül Pembe', 310, '/src/assets/song/Image (3).png', 2156, 234),
   ('550e8400-e29b-41d4-a716-446655440006', 'Kaleidoscope', '550e8400-e29b-41d4-a716-446655440001', 'Kaleidoscope', 295, '/src/assets/song/Image (4).png', 1789, 167)
 ON CONFLICT (id) DO NOTHING;
+
+-- Feed Items tablosu (tüm kullanıcı aktiviteleri)
+CREATE TABLE IF NOT EXISTS public.feed_items (
+  id uuid primary key default uuid_generate_v4(),
+  type text check (type in ('respect_sent', 'song_favorited', 'artist_followed', 'song_shared', 'chat_message')),
+  user_id uuid references auth.users(id) on delete cascade,
+  artist_id uuid references artists(id) on delete cascade,
+  song_id uuid references songs(id) on delete cascade,
+  content jsonb, -- flexible data storage (amount, message, etc.)
+  created_at timestamp default now()
+);
+
+-- Feed Items için RLS Policies
+ALTER TABLE feed_items ENABLE ROW LEVEL SECURITY;
+
+-- Herkes feed items'ları görebilir
+CREATE POLICY "Feed items are viewable by everyone" 
+ON feed_items FOR SELECT USING (true);
+
+-- Kullanıcılar kendi feed items'larını oluşturabilir
+CREATE POLICY "Users can create own feed items" 
+ON feed_items FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Feed Items için indexler
+CREATE INDEX IF NOT EXISTS idx_feed_items_type ON feed_items(type);
+CREATE INDEX IF NOT EXISTS idx_feed_items_user_id ON feed_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_feed_items_artist_id ON feed_items(artist_id);
+CREATE INDEX IF NOT EXISTS idx_feed_items_song_id ON feed_items(song_id);
+CREATE INDEX IF NOT EXISTS idx_feed_items_created_at ON feed_items(created_at DESC);
+
+-- Respect Transactions tablosu (respect gönderme işlemleri)
+CREATE TABLE IF NOT EXISTS public.respect_transactions (
+  id uuid primary key default uuid_generate_v4(),
+  from_user_id uuid references auth.users(id) on delete cascade,
+  to_artist_id uuid references artists(id) on delete cascade,
+  song_id uuid references songs(id) on delete cascade,
+  amount integer not null,
+  message text,
+  transaction_type text check (transaction_type in ('artist', 'song')),
+  created_at timestamp default now()
+);
+
+-- Respect Transactions için RLS Policies
+ALTER TABLE respect_transactions ENABLE ROW LEVEL SECURITY;
+
+-- Herkes respect transactions'ları görebilir
+CREATE POLICY "Respect transactions are viewable by everyone" 
+ON respect_transactions FOR SELECT USING (true);
+
+-- Kullanıcılar kendi respect transactions'larını oluşturabilir
+CREATE POLICY "Users can create own respect transactions" 
+ON respect_transactions FOR INSERT WITH CHECK (auth.uid() = from_user_id);
+
+-- Respect Transactions için indexler
+CREATE INDEX IF NOT EXISTS idx_respect_transactions_from_user_id ON respect_transactions(from_user_id);
+CREATE INDEX IF NOT EXISTS idx_respect_transactions_to_artist_id ON respect_transactions(to_artist_id);
+CREATE INDEX IF NOT EXISTS idx_respect_transactions_song_id ON respect_transactions(song_id);
+CREATE INDEX IF NOT EXISTS idx_respect_transactions_created_at ON respect_transactions(created_at DESC);
+
+-- Chat Messages tablosu (real-time chat mesajları)
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+  id uuid primary key default uuid_generate_v4(),
+  room_id text not null, -- artist_id veya song_id
+  room_type text check (room_type in ('artist', 'song')),
+  user_id uuid references auth.users(id) on delete cascade,
+  message text not null,
+  created_at timestamp default now()
+);
+
+-- Chat Messages için RLS Policies
+ALTER TABLE chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Herkes chat mesajlarını görebilir
+CREATE POLICY "Chat messages are viewable by everyone" 
+ON chat_messages FOR SELECT USING (true);
+
+-- Kullanıcılar kendi chat mesajlarını oluşturabilir
+CREATE POLICY "Users can create own chat messages" 
+ON chat_messages FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Chat Messages için indexler
+CREATE INDEX IF NOT EXISTS idx_chat_messages_room_id ON chat_messages(room_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_room_type ON chat_messages(room_type);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_user_id ON chat_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_created_at ON chat_messages(created_at DESC);
   album_name text,
   cover_url text,
   duration_ms integer,

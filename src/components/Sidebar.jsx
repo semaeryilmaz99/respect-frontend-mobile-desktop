@@ -95,13 +95,13 @@ const Sidebar = () => {
     },
     {
       label: 'Sanatçılar',
-      path: '/artist/1',
-      action: () => handleNavigation('/artist/1')
+      path: '/artists',
+      action: () => handleNavigation('/artists')
     },
     {
       label: 'Şarkılar',
-      path: '/song/1',
-      action: () => handleNavigation('/song/1')
+      path: '/songs',
+      action: () => handleNavigation('/songs')
     },
     {
       label: 'Respect Gönder',

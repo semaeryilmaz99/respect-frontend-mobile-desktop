@@ -1,41 +1,64 @@
-import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { supabase } from '../config/supabase'
+import FavoriteButton from './FavoriteButton'
 
 const SongsList = () => {
   const navigate = useNavigate()
-  
-  const songs = [
-    {
-      id: 1,
-      title: "Gidiyorum",
-      artist: "Sezen Aksu",
-      cover: "/src/assets/song/Image.png"
-    },
-    {
-      id: 2,
-      title: "Şarkı Söyleyemem",
-      artist: "Sezen Aksu", 
-      cover: "/src/assets/song/Image (1).png"
-    },
-    {
-      id: 3,
-      title: "Kaybolan Yıllar",
-      artist: "Sezen Aksu", 
-      cover: "/src/assets/song/Image (2).png"
+  const { artistId } = useParams()
+  const [songs, setSongs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchArtistSongs = async () => {
+      try {
+        setLoading(true)
+        
+        const { data, error } = await supabase
+          .from('songs')
+          .select('*')
+          .eq('artist_id', artistId)
+          .order('total_respect', { ascending: false })
+
+        if (error) {
+          throw error
+        }
+
+        setSongs(data || [])
+      } catch (error) {
+        console.error('Error fetching artist songs:', error)
+        setError('Şarkılar yüklenirken hata oluştu')
+      } finally {
+        setLoading(false)
+      }
     }
-  ]
+
+    if (artistId) {
+      fetchArtistSongs()
+    }
+  }, [artistId])
 
   const handleSongClick = (song) => {
-    // Şarkıya tıklandığında song sayfasına yönlendir
-    navigate(`/song/${song.id}`, {
-      state: {
-        songId: song.id,
-        songTitle: song.title,
-        artistName: song.artist,
-        songCover: song.cover,
-        currentRespect: '1,247' // Örnek respect sayısı
-      }
-    })
+    navigate(`/song/${song.id}`)
+  }
+
+  if (loading) {
+    return (
+      <div className="songs-list">
+        <h3 className="section-title">Şarkılar</h3>
+        <div className="loading-message">Şarkılar yükleniyor...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="songs-list">
+        <h3 className="section-title">Şarkılar</h3>
+        <div className="error-message">{error}</div>
+      </div>
+    )
   }
 
   return (
@@ -51,12 +74,21 @@ const SongsList = () => {
             style={{ cursor: 'pointer' }}
           >
             <div className="song-cover">
-              <img src={song.cover} alt={`${song.title} kapağı`} />
+              <img src={song.cover_url || '/src/assets/song/Image.png'} alt={`${song.title} kapağı`} />
             </div>
             
             <div className="song-info">
               <h4 className="song-title">{song.title}</h4>
-              <p className="song-artist">{song.artist}</p>
+              <p className="song-album">{song.album}</p>
+              <p className="song-duration">{song.duration}</p>
+              <div className="song-stats">
+                <span className="song-respect">{song.total_respect || 0} Respect</span>
+                <span className="song-favorites">{song.favorites_count || 0} Favori</span>
+              </div>
+            </div>
+            
+            <div className="song-actions">
+              <FavoriteButton songId={song.id} />
             </div>
           </div>
         ))}

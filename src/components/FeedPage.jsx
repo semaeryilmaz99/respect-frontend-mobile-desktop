@@ -9,8 +9,8 @@ const FeedPage = () => {
   const [activeTab, setActiveTab] = useState('community')
   const [feedData, setFeedData] = useState([])
   const [respectFlowData, setRespectFlowData] = useState([])
-  const [topArtists, setTopArtists] = useState([])
-  const [topSongs, setTopSongs] = useState([])
+  const [_topArtists, setTopArtists] = useState([])
+  const [_topSongs, setTopSongs] = useState([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
   
@@ -24,9 +24,18 @@ const FeedPage = () => {
       try {
         setLoading(true)
         
-        // Feed verilerini yükle
-        const feed = await feedService.getFeed()
-        setFeedData(feed)
+        // Aktif tab'a göre feed verilerini yükle
+        if (activeTab === 'community') {
+          // Topluluk feed'i - tüm kullanıcı aktiviteleri
+          const feed = await feedService.getFeed()
+          console.log('🔍 Community feed data:', feed)
+          setFeedData(feed)
+        } else if (activeTab === 'personal') {
+          // Kişisel feed'i - takip edilen sanatçılar ve favori şarkılar
+          const feed = await feedService.getPersonalFeed()
+          console.log('🔍 Personal feed data:', feed)
+          setFeedData(feed)
+        }
         
         // Respect flow verilerini yükle
         const respectFlow = await feedService.getRespectFlow()
@@ -48,7 +57,7 @@ const FeedPage = () => {
     }
 
     loadData()
-  }, [])
+  }, [activeTab]) // activeTab değiştiğinde yeniden yükle
 
   // Database'den gelen verileri formatla
   const formatFeedData = (data) => {
@@ -64,11 +73,13 @@ const FeedPage = () => {
     if (item.type === 'respect_sent') {
       const amount = item.content?.amount || 0
       const message = item.content?.message || ''
-      const artistName = item.artists?.name || 'Artist'
-      const songTitle = item.songs?.title || 'Song'
-      return `${artistName} - ${songTitle} şarkısına ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
+      return `Şarkıya ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
+    } else if (item.type === 'song_favorited') {
+      return 'Şarkı favorilere eklendi'
+    } else if (item.type === 'artist_followed') {
+      return 'Sanatçı takip edildi'
     }
-    return 'Respect gönderildi'
+    return 'Aktivite gerçekleşti'
   }
 
   const getFeedItemButtonText = (item) => {
@@ -78,8 +89,8 @@ const FeedPage = () => {
     return 'Görüntüle'
   }
 
-  const getFeedItemImage = (item) => {
-    return item.artists?.avatar_url || item.songs?.cover_url || '/src/assets/artist/Image.png'
+  const getFeedItemImage = () => {
+    return '/src/assets/artist/Image.png'
   }
 
   // Loading durumu

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../context/AppContext'
 import followService from '../api/followService'
+import feedService from '../api/feedService'
 
 const FollowButton = ({ artistId, artistName, initialFollowersCount = 0, size = 'medium' }) => {
   const { state } = useAppContext()
@@ -65,6 +66,16 @@ const FollowButton = ({ artistId, artistName, initialFollowersCount = 0, size = 
       // Update local state
       setIsFollowing(!isFollowing)
       setFollowersCount(prev => isFollowing ? prev - 1 : prev + 1)
+      
+      // Feed item oluştur (sadece follow edildiğinde)
+      if (!isFollowing) {
+        try {
+          await feedService.createArtistFollowedFeedItem(artistId)
+          console.log('✅ Feed item created for artist follow')
+        } catch (error) {
+          console.error('❌ Feed item creation failed:', error)
+        }
+      }
       
       console.log(`✅ ${isFollowing ? 'Unfollowed' : 'Followed'} artist: ${artistName}`)
     } catch (error) {
