@@ -56,7 +56,7 @@ const feedService = {
     }
   },
 
-  // Kullanıcıya özel feed verilerini getir (takip edilen sanatçılar ve favori şarkılar)
+  // Kullanıcıya özel feed verilerini getir (takip edilen sanatçılar ve favori şarkılarla ilgili diğer kullanıcıların işlemleri)
   getPersonalFeed: async (page = 1) => {
     try {
       console.log('👤 Fetching personal feed data...')
@@ -65,6 +65,8 @@ const feedService = {
       if (userError || !user) {
         throw new Error('Kullanıcı giriş yapmamış')
       }
+
+      console.log('👤 Current user ID:', user.id)
 
       // Kullanıcının takip ettiği sanatçıları getir
       const { data: followedArtists, error: followError } = await supabase
@@ -77,6 +79,7 @@ const feedService = {
         console.error('Follow error:', followError)
       } else {
         followedArtistIds = followedArtists.map(fa => fa.artist_id)
+        console.log('🎨 Followed artist IDs:', followedArtistIds)
       }
 
       // Kullanıcının favori şarkılarını getir
@@ -90,6 +93,7 @@ const feedService = {
         console.error('Favorite error:', favoriteError)
       } else {
         favoriteSongIds = favoriteSongs.map(fs => fs.song_id)
+        console.log('🎵 Favorite song IDs:', favoriteSongIds)
       }
 
       // Eğer takip edilen sanatçı veya favori şarkı yoksa boş array döndür
@@ -99,18 +103,36 @@ const feedService = {
       }
 
       // Takip edilen sanatçılar ve favori şarkılarla ilgili feed items'ları getir
+      // ÖNEMLİ: Sadece diğer kullanıcıların işlemlerini göster (kendi işlemlerini değil)
       let query = supabase
         .from('feed_items')
-        .select('*')
+        .select(`
+          *,
+          artists (
+            id,
+            name,
+            avatar_url
+          ),
+          songs (
+            id,
+            title,
+            cover_url,
+            artists (
+              id,
+              name
+            )
+          )
+        `)
+        .neq('user_id', user.id) // Kendi işlemlerini hariç tut
         .order('created_at', { ascending: false })
 
-      // OR koşulu oluştur
+      // OR koşulu oluştur - takip edilen sanatçılar VEYA favori şarkılarla ilgili işlemler
       const conditions = []
       if (followedArtistIds.length > 0) {
-        conditions.push(`artist_id.in.(${followedArtistIds.join(',')})`)
+        conditions.push(`artist_id.in.(${followedArtistIds.map(id => `"${id}"`).join(',')})`)
       }
       if (favoriteSongIds.length > 0) {
-        conditions.push(`song_id.in.(${favoriteSongIds.join(',')})`)
+        conditions.push(`song_id.in.(${favoriteSongIds.map(id => `"${id}"`).join(',')})`)
       }
 
       if (conditions.length > 0) {
@@ -121,10 +143,44 @@ const feedService = {
         .range((page - 1) * 20, page * 20 - 1)
 
       if (error) {
+        console.error('❌ Personal feed query error:', error)
         throw error
       }
 
+      // Kullanıcı bilgilerini ayrı query ile al
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(item => item.user_id))]
+        console.log('👥 User IDs to fetch:', userIds)
+
+        const { data: userProfiles, error: userError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', userIds)
+
+        if (userError) {
+          console.error('❌ User profiles fetch error:', userError)
+        } else {
+          console.log('✅ User profiles fetched:', userProfiles)
+          
+          // Kullanıcı bilgilerini feed items'a ekle
+          const userMap = {}
+          userProfiles?.forEach(profile => {
+            userMap[profile.id] = profile
+          })
+
+          const enrichedData = data.map(item => ({
+            ...item,
+            profiles: userMap[item.user_id]
+          }))
+
+          console.log('✅ Personal feed data enriched:', enrichedData)
+          console.log('📊 Personal feed count:', enrichedData?.length || 0)
+          return enrichedData || []
+        }
+      }
+
       console.log('✅ Personal feed data fetched:', data)
+      console.log('📊 Personal feed count:', data?.length || 0)
       return data || []
 
     } catch (error) {

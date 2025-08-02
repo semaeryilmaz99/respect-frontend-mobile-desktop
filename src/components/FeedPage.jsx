@@ -60,15 +60,30 @@ const FeedPage = () => {
 
   // Database'den gelen verileri formatla
   const formatFeedData = (data) => {
-    return data.map(item => ({
-      type: item.type,
-      title: getFeedItemTitle(item),
-      buttonText: getFeedItemButtonText(item),
-      profileImage: getFeedItemImage(item),
-      artistId: item.artist_id,
-      songId: item.song_id,
-      userId: item.user_id
-    }))
+    return data.map(item => {
+      const formattedItem = {
+        type: item.type,
+        title: activeTab === 'personal' ? getPersonalFeedItemTitle(item) : getFeedItemTitle(item),
+        buttonText: getFeedItemButtonText(item),
+        profileImage: getFeedItemImage(item),
+        artistId: item.artist_id,
+        songId: item.song_id,
+        userId: item.user_id
+      }
+      
+      // Debug: Personal feed için detaylı bilgi
+      if (activeTab === 'personal') {
+        console.log('👤 Personal feed item details:', {
+          type: item.type,
+          userName: item.profiles?.full_name || item.profiles?.username,
+          artistName: item.artists?.name,
+          songTitle: item.songs?.title,
+          title: formattedItem.title
+        })
+      }
+      
+      return formattedItem
+    })
   }
 
   const getFeedItemTitle = (item) => {
@@ -89,6 +104,27 @@ const FeedPage = () => {
     return 'Aktivite gerçekleşti'
   }
 
+  // Personal feed için özel başlık formatı
+  const getPersonalFeedItemTitle = (item) => {
+    const userName = item.profiles?.full_name || item.profiles?.username || 'Bilinmeyen Kullanıcı'
+    
+    if (item.type === 'respect_sent') {
+      const amount = item.content?.amount || 0
+      const message = item.content?.message || ''
+      const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
+      const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
+      return `🎵 ${userName} favori şarkınıza ${amount} respect gönderdi: ${songTitle} - ${artistName}${message ? `: "${message}"` : ''}`
+    } else if (item.type === 'song_favorited') {
+      const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
+      const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
+      return `🎵 ${userName} favori şarkınızı favorilere ekledi: ${songTitle} - ${artistName}`
+    } else if (item.type === 'artist_followed') {
+      const artistName = item.artists?.name || 'Bilinmeyen Sanatçı'
+      return `🎨 ${userName} takip ettiğiniz sanatçıyı takip etmeye başladı: ${artistName}`
+    }
+    return `${userName} aktivite gerçekleştirdi`
+  }
+
   const getFeedItemButtonText = (item) => {
     if (item.type === 'respect_sent') {
       return 'Detayları Gör'
@@ -97,6 +133,12 @@ const FeedPage = () => {
   }
 
   const getFeedItemImage = (item) => {
+    // Personal feed'de kullanıcının profil resmini göster
+    if (activeTab === 'personal' && item.profiles?.avatar_url) {
+      return item.profiles.avatar_url
+    }
+    
+    // Community feed'de normal mantık
     if (item.type === 'artist_followed' && item.artists?.avatar_url) {
       return item.artists.avatar_url
     } else if (item.type === 'song_favorited' && item.songs?.cover_url) {
@@ -136,6 +178,8 @@ const FeedPage = () => {
 
   // Database'den gelen verileri kullan
   console.log('📊 Raw feed data:', feedData)
+  console.log('📊 Active tab:', activeTab)
+  console.log('📊 Feed data type:', activeTab === 'community' ? 'Community' : 'Personal')
   const currentData = formatFeedData(feedData)
   console.log('📊 Formatted feed data:', currentData)
 
