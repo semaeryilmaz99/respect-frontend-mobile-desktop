@@ -71,37 +71,37 @@ const FeedPage = () => {
         userId: item.user_id
       }
       
-      // Debug: Personal feed için detaylı bilgi
-      if (activeTab === 'personal') {
-        console.log('👤 Personal feed item details:', {
-          type: item.type,
-          userName: item.profiles?.full_name || item.profiles?.username,
-          artistName: item.artists?.name,
-          songTitle: item.songs?.title,
-          title: formattedItem.title
-        })
-      }
+      // Debug: Feed item detayları
+      console.log(`${activeTab === 'personal' ? '👤 Personal' : '🌍 Community'} feed item details:`, {
+        type: item.type,
+        userName: item.profiles?.full_name || item.profiles?.username,
+        artistName: item.artists?.name,
+        songTitle: item.songs?.title,
+        title: formattedItem.title
+      })
       
       return formattedItem
     })
   }
 
   const getFeedItemTitle = (item) => {
+    const userName = item.profiles?.full_name || item.profiles?.username || 'Bilinmeyen Kullanıcı'
+    
     if (item.type === 'respect_sent') {
       const amount = item.content?.amount || 0
       const message = item.content?.message || ''
       const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
       const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
-      return `${songTitle} - ${artistName} şarkısına ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
+      return `💰 ${userName} ${songTitle} - ${artistName} şarkısına ${amount} respect gönderdi${message ? `: "${message}"` : ''}`
     } else if (item.type === 'song_favorited') {
       const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
       const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
-      return `${songTitle} - ${artistName} şarkısı favorilere eklendi`
+      return `❤️ ${userName} ${songTitle} - ${artistName} şarkısını favorilere ekledi`
     } else if (item.type === 'artist_followed') {
       const artistName = item.artists?.name || 'Bilinmeyen Sanatçı'
-      return `${artistName} sanatçısı takip edildi`
+      return `👥 ${userName} ${artistName} sanatçısını takip etmeye başladı`
     }
-    return 'Aktivite gerçekleşti'
+    return `${userName} aktivite gerçekleştirdi`
   }
 
   // Personal feed için özel başlık formatı
@@ -133,12 +133,12 @@ const FeedPage = () => {
   }
 
   const getFeedItemImage = (item) => {
-    // Personal feed'de kullanıcının profil resmini göster
-    if (activeTab === 'personal' && item.profiles?.avatar_url) {
+    // Her iki feed'de de kullanıcının profil resmini göster
+    if (item.profiles?.avatar_url) {
       return item.profiles.avatar_url
     }
     
-    // Community feed'de normal mantık
+    // Fallback: Sanatçı/şarkı resmi
     if (item.type === 'artist_followed' && item.artists?.avatar_url) {
       return item.artists.avatar_url
     } else if (item.type === 'song_favorited' && item.songs?.cover_url) {

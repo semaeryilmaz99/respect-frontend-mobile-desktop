@@ -13,7 +13,7 @@ const feedService = {
 
       console.log('📊 Total feed items count:', count, countError)
       
-      // Basit sorgu ile başla - profiles tablosu olmadığı için kaldırıldı
+      // Basit sorgu ile başla
       let query = supabase
         .from('feed_items')
         .select(`
@@ -45,6 +45,37 @@ const feedService = {
       if (error) {
         console.error('❌ Feed query error:', error)
         throw error
+      }
+
+      // Kullanıcı bilgilerini ayrı query ile al
+      if (data && data.length > 0) {
+        const userIds = [...new Set(data.map(item => item.user_id))]
+        console.log('👥 Community feed - User IDs to fetch:', userIds)
+
+        const { data: userProfiles, error: userError } = await supabase
+          .from('profiles')
+          .select('id, username, full_name, avatar_url')
+          .in('id', userIds)
+
+        if (userError) {
+          console.error('❌ Community feed - User profiles fetch error:', userError)
+        } else {
+          console.log('✅ Community feed - User profiles fetched:', userProfiles)
+          
+          // Kullanıcı bilgilerini feed items'a ekle
+          const userMap = {}
+          userProfiles?.forEach(profile => {
+            userMap[profile.id] = profile
+          })
+
+          const enrichedData = data.map(item => ({
+            ...item,
+            profiles: userMap[item.user_id]
+          }))
+
+          console.log('✅ Community feed data enriched:', enrichedData)
+          return enrichedData || []
+        }
       }
 
       console.log('✅ Feed data fetched:', data)
