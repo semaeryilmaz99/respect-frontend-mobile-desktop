@@ -1,16 +1,53 @@
-# 🎵 **RESPECT UYGULAMASI - ROADMAP & VERİTABANI TASARIMI**
+# 🎵 **RESPECT UYGULAMASI - KAPSAMLI ROADMAP & VERİTABANI TASARIMI**
 
-## 📋 **UYGULAMA GENEL MANTIĞI**
+## 📋 **UYGULAMA GENEL MANTIĞI VE İŞ AKIŞI**
 
 Respect uygulaması, müzik tutkunlarının sanatçıları ve şarkıları destekleyebileceği, topluluk oluşturabileceği ve gerçek zamanlı iletişim kurabileceği bir platformdur.
 
+### **🔄 Ana İş Akışı:**
+
+1. **Kullanıcı Kayıt Süreci:**
+   - Email ile kayıt olma
+   - Email doğrulama
+   - Profil ayarları sayfasında profil oluşturma
+   - Kullanıcı verilerinin sisteme kaydedilmesi
+
+2. **Profil ve Kişiselleştirme:**
+   - Her kullanıcıya özel profil sayfası
+   - Kullanıcı verilerine dayalı kişiselleştirilmiş içerik
+   - Takip edilen sanatçılar ve favori şarkıların gösterimi
+   - Kullanıcının gönderdiği respect'lerin takibi
+
+3. **Feed Sistemi:**
+   - **Topluluk Bölümü:** Tüm kullanıcıların eylemlerinden oluşan genel feed
+   - **Sana Özel Bölümü:** Kullanıcının takip ettiği sanatçı ve favorilediği şarkılara dayalı kişiselleştirilmiş feed
+   - Real-time feed güncellemeleri
+
+4. **Takip ve Favori Sistemi:**
+   - Sanatçı takip etme/bırakma
+   - Şarkı favori ekleme/çıkarma
+   - Takip listesi yönetimi
+   - Favori şarkılar listesi
+
+5. **Chat Room Sistemi:**
+   - Aynı sanatçıyı takip eden kullanıcılar için sanatçı chat room'u
+   - Aynı şarkıyı favorileyen kullanıcılar için şarkı chat room'u
+   - Ortak ilgi alanlarına sahip kullanıcıların bir araya gelmesi
+   - Real-time mesajlaşma
+
+6. **Respect Ekonomisi:**
+   - Sanatçılara ve şarkılara respect gönderme
+   - Respect balance yönetimi
+   - Transaction geçmişi
+   - Günlük bonus sistemi
+
 ### **🎯 Ana Özellikler:**
-1. **Kullanıcı Kayıt & Profil Sistemi** - Email ile kayıt, profil oluşturma
-2. **Sanatçı & Şarkı Takip Sistemi** - Favori ekleme, takip etme
-3. **Respect Ekonomisi** - Sanatçılara ve şarkılara respect gönderme
-4. **Topluluk Feed'i** - Genel ve kişiselleştirilmiş aktivite akışı
-5. **Gerçek Zamanlı Chat** - Ortak ilgi alanlarına sahip kullanıcılar arası iletişim
-6. **Ortak Topluluklar** - Benzer zevklere sahip kullanıcıların bir araya gelmesi
+1. **Kullanıcı Kayıt & Profil Sistemi** - Email ile kayıt, profil oluşturma ve kişiselleştirme
+2. **Sanatçı & Şarkı Takip Sistemi** - Favori ekleme, takip etme ve listeleme
+3. **Respect Ekonomisi** - Sanatçılara ve şarkılara respect gönderme sistemi
+4. **Dual Feed Sistemi** - Genel topluluk ve kişiselleştirilmiş aktivite akışı
+5. **Ortak İlgi Alanı Chat'leri** - Aynı sanatçı/şarkı takipçileri için chat room'ları
+6. **Real-time İletişim** - Anlık mesajlaşma ve bildirim sistemi
 
 ---
 
@@ -34,6 +71,8 @@ CREATE TABLE public.profiles (
   favorite_songs_count integer default 0,
   followed_artists_count integer default 0,
   is_verified boolean default false,
+  is_profile_completed boolean default false, -- Profil tamamlama durumu
+  profile_completed_at timestamp,
   last_active timestamp default now(),
   created_at timestamp default now(),
   updated_at timestamp default now()
@@ -135,13 +174,15 @@ CREATE TABLE public.feed_items (
     'song_shared', 
     'chat_message',
     'daily_bonus_claimed',
-    'milestone_reached'
+    'milestone_reached',
+    'profile_completed'
   )),
   user_id uuid references auth.users(id) on delete cascade,
   artist_id uuid references artists(id) on delete cascade,
   song_id uuid references songs(id) on delete cascade,
   content jsonb, -- Esnek veri saklama (amount, message, milestone_type vb.)
-  is_public boolean default true,
+  is_public boolean default true, -- Topluluk feed'inde gösterilip gösterilmeyeceği
+  is_personal boolean default false, -- Kişisel feed'de gösterilip gösterilmeyeceği
   created_at timestamp default now()
 );
 ```
@@ -178,7 +219,22 @@ CREATE TABLE public.chat_rooms (
 );
 ```
 
-#### **10. Kullanıcı İstatistikleri (user_stats)**
+#### **10. Chat Room Üyelikleri (chat_room_members)**
+```sql
+CREATE TABLE public.chat_room_members (
+  id uuid primary key default uuid_generate_v4(),
+  room_id text not null,
+  room_type text check (room_type in ('artist', 'song')),
+  user_id uuid references auth.users(id) on delete cascade,
+  joined_at timestamp default now(),
+  is_active boolean default true,
+  
+  -- Her kullanıcı bir odaya sadece bir kez katılabilir
+  UNIQUE(room_id, user_id)
+);
+```
+
+#### **11. Kullanıcı İstatistikleri (user_stats)**
 ```sql
 CREATE TABLE public.user_stats (
   id uuid primary key default uuid_generate_v4(),
@@ -206,7 +262,7 @@ CREATE TABLE public.user_stats (
 );
 ```
 
-#### **11. Günlük Bonus Sistemi (daily_bonuses)**
+#### **12. Günlük Bonus Sistemi (daily_bonuses)**
 ```sql
 CREATE TABLE public.daily_bonuses (
   id uuid primary key default uuid_generate_v4(),
@@ -221,7 +277,7 @@ CREATE TABLE public.daily_bonuses (
 );
 ```
 
-#### **12. Bildirimler (notifications)**
+#### **13. Bildirimler (notifications)**
 ```sql
 CREATE TABLE public.notifications (
   id uuid primary key default uuid_generate_v4(),
@@ -232,13 +288,35 @@ CREATE TABLE public.notifications (
     'chat_message',
     'daily_bonus',
     'milestone_reached',
-    'system_announcement'
+    'system_announcement',
+    'new_chat_room_member'
   )),
   title text not null,
   message text not null,
   data jsonb, -- Ek veri (artist_id, song_id, amount vb.)
   is_read boolean default false,
   read_at timestamp,
+  created_at timestamp default now()
+);
+```
+
+#### **14. Kullanıcı Aktivite Geçmişi (user_activities)**
+```sql
+CREATE TABLE public.user_activities (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade,
+  activity_type text check (activity_type in (
+    'login',
+    'profile_update',
+    'respect_sent',
+    'artist_followed',
+    'song_favorited',
+    'chat_message_sent',
+    'daily_bonus_claimed'
+  )),
+  activity_data jsonb, -- Aktivite detayları
+  ip_address inet,
+  user_agent text,
   created_at timestamp default now()
 );
 ```
@@ -275,6 +353,19 @@ CREATE POLICY "Users can manage own follows"
 ON artist_follows FOR ALL USING (auth.uid() = user_id);
 ```
 
+#### **Song Favorites RLS**
+```sql
+ALTER TABLE song_favorites ENABLE ROW LEVEL SECURITY;
+
+-- Herkes favori ilişkilerini görebilir
+CREATE POLICY "Song favorites are viewable by everyone" 
+ON song_favorites FOR SELECT USING (true);
+
+-- Kullanıcılar kendi favori işlemlerini yapabilir
+CREATE POLICY "Users can manage own favorites" 
+ON song_favorites FOR ALL USING (auth.uid() = user_id);
+```
+
 #### **Respect Transactions RLS**
 ```sql
 ALTER TABLE respect_transactions ENABLE ROW LEVEL SECURITY;
@@ -303,6 +394,19 @@ ON chat_messages FOR INSERT WITH CHECK (auth.uid() = user_id);
 -- Kullanıcılar kendi mesajlarını düzenleyebilir/silebilir
 CREATE POLICY "Users can manage own messages" 
 ON chat_messages FOR UPDATE USING (auth.uid() = user_id);
+```
+
+#### **Chat Room Members RLS**
+```sql
+ALTER TABLE chat_room_members ENABLE ROW LEVEL SECURITY;
+
+-- Herkes chat room üyeliklerini görebilir
+CREATE POLICY "Chat room members are viewable by everyone" 
+ON chat_room_members FOR SELECT USING (true);
+
+-- Kullanıcılar kendi üyeliklerini yönetebilir
+CREATE POLICY "Users can manage own memberships" 
+ON chat_room_members FOR ALL USING (auth.uid() = user_id);
 ```
 
 ### **⚡ Veritabanı Fonksiyonları ve Trigger'lar**
@@ -349,14 +453,16 @@ BEGIN
     p_from_user_id, p_to_artist_id, p_song_id, p_amount, p_message, p_transaction_type
   );
 
-  -- Feed item oluştur
-  INSERT INTO feed_items (type, user_id, artist_id, song_id, content)
+  -- Feed item oluştur (hem genel hem kişisel)
+  INSERT INTO feed_items (type, user_id, artist_id, song_id, content, is_public, is_personal)
   VALUES (
     'respect_sent',
     p_from_user_id,
     p_to_artist_id,
     p_song_id,
-    jsonb_build_object('amount', p_amount, 'message', p_message)
+    jsonb_build_object('amount', p_amount, 'message', p_message),
+    true,
+    true
   );
 END;
 $$ LANGUAGE plpgsql;
@@ -370,7 +476,7 @@ BEGIN
   IF TG_OP = 'INSERT' THEN
     -- Kullanıcının following_count'unu artır
     UPDATE profiles 
-    SET following_count = following_count + 1
+    SET followed_artists_count = followed_artists_count + 1
     WHERE id = NEW.user_id;
     
     -- Sanatçının followers_count'unu artır
@@ -378,17 +484,37 @@ BEGIN
     SET followers_count = followers_count + 1
     WHERE id = NEW.artist_id;
     
+    -- Feed item oluştur
+    INSERT INTO feed_items (type, user_id, artist_id, content, is_public, is_personal)
+    VALUES (
+      'artist_followed',
+      NEW.user_id,
+      NEW.artist_id,
+      jsonb_build_object('action', 'followed'),
+      true,
+      true
+    );
+    
+    -- Chat room'a otomatik katılım
+    INSERT INTO chat_room_members (room_id, room_type, user_id)
+    VALUES (NEW.artist_id::text, 'artist', NEW.user_id)
+    ON CONFLICT (room_id, user_id) DO NOTHING;
+    
     RETURN NEW;
   ELSIF TG_OP = 'DELETE' THEN
     -- Kullanıcının following_count'unu azalt
     UPDATE profiles 
-    SET following_count = following_count - 1
+    SET followed_artists_count = followed_artists_count - 1
     WHERE id = OLD.user_id;
     
     -- Sanatçının followers_count'unu azalt
     UPDATE artists 
     SET followers_count = followers_count - 1
     WHERE id = OLD.artist_id;
+    
+    -- Chat room'dan çıkış
+    DELETE FROM chat_room_members 
+    WHERE room_id = OLD.artist_id::text AND user_id = OLD.user_id;
     
     RETURN OLD;
   END IF;
@@ -418,6 +544,22 @@ BEGIN
     SET favorites_count = favorites_count + 1
     WHERE id = NEW.song_id;
     
+    -- Feed item oluştur
+    INSERT INTO feed_items (type, user_id, song_id, content, is_public, is_personal)
+    VALUES (
+      'song_favorited',
+      NEW.user_id,
+      NEW.song_id,
+      jsonb_build_object('action', 'favorited'),
+      true,
+      true
+    );
+    
+    -- Chat room'a otomatik katılım
+    INSERT INTO chat_room_members (room_id, room_type, user_id)
+    VALUES (NEW.song_id::text, 'song', NEW.user_id)
+    ON CONFLICT (room_id, user_id) DO NOTHING;
+    
     RETURN NEW;
   ELSIF TG_OP = 'DELETE' THEN
     -- Kullanıcının favorite_songs_count'unu azalt
@@ -429,6 +571,10 @@ BEGIN
     UPDATE songs 
     SET favorites_count = favorites_count - 1
     WHERE id = OLD.song_id;
+    
+    -- Chat room'dan çıkış
+    DELETE FROM chat_room_members 
+    WHERE room_id = OLD.song_id::text AND user_id = OLD.user_id;
     
     RETURN OLD;
   END IF;
@@ -442,126 +588,199 @@ CREATE TRIGGER trigger_update_favorite_counts
     EXECUTE FUNCTION update_favorite_counts();
 ```
 
+#### **4. Chat Room Oluşturma Fonksiyonu**
+```sql
+CREATE OR REPLACE FUNCTION create_chat_room_if_not_exists(
+  p_room_id text,
+  p_room_type text,
+  p_room_name text DEFAULT NULL,
+  p_room_description text DEFAULT NULL
+) RETURNS void AS $$
+BEGIN
+  -- Chat room yoksa oluştur
+  INSERT INTO chat_rooms (room_id, room_type, room_name, room_description)
+  VALUES (p_room_id, p_room_type, p_room_name, p_room_description)
+  ON CONFLICT (room_id) DO NOTHING;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+#### **5. Profil Tamamlama Fonksiyonu**
+```sql
+CREATE OR REPLACE FUNCTION complete_user_profile(
+  p_user_id uuid,
+  p_username text,
+  p_full_name text,
+  p_bio text DEFAULT NULL,
+  p_avatar_url text DEFAULT NULL
+) RETURNS void AS $$
+BEGIN
+  -- Profil bilgilerini güncelle
+  UPDATE profiles 
+  SET 
+    username = p_username,
+    full_name = p_full_name,
+    bio = p_bio,
+    avatar_url = p_avatar_url,
+    is_profile_completed = true,
+    profile_completed_at = now(),
+    updated_at = now()
+  WHERE id = p_user_id;
+  
+  -- Profil tamamlama feed item'ı oluştur
+  INSERT INTO feed_items (type, user_id, content, is_public, is_personal)
+  VALUES (
+    'profile_completed',
+    p_user_id,
+    jsonb_build_object('username', p_username, 'full_name', p_full_name),
+    true,
+    true
+  );
+END;
+$$ LANGUAGE plpgsql;
+```
+
 ---
 
 ## 🗺️ **GELİŞTİRME ROADMAP**
 
-### **📅 Phase 1: Temel Altyapı (Hafta 1-2)**
+### **📅 Phase 1: Temel Altyapı ve Kullanıcı Sistemi (Hafta 1-2)**
 
 #### **1.1 Veritabanı Kurulumu**
 - [ ] Supabase projesi oluşturma
 - [ ] Veritabanı şeması migration'ları
 - [ ] RLS politikaları uygulama
 - [ ] Trigger'lar ve fonksiyonlar oluşturma
-- [ ] Örnek veri ekleme
+- [ ] Örnek veri ekleme (sanatçılar, şarkılar)
 
-#### **1.2 Authentication Sistemi**
+#### **1.2 Authentication ve Profil Sistemi**
 - [ ] Email/password authentication
-- [ ] Profil oluşturma akışı
-- [ ] Kullanıcı doğrulama
+- [ ] Email doğrulama sistemi
+- [ ] Profil oluşturma akışı (username, full_name, bio, avatar)
+- [ ] Profil tamamlama kontrolü
 - [ ] Session yönetimi
 
 #### **1.3 Temel API Servisleri**
-- [ ] User service
-- [ ] Artist service
-- [ ] Song service
-- [ ] Respect service
+- [ ] User service (profil CRUD, istatistikler)
+- [ ] Artist service (sanatçı listeleme, detay)
+- [ ] Song service (şarkı listeleme, detay)
+- [ ] Respect service (balance, transaction)
 
-### **📅 Phase 2: Core Features (Hafta 3-4)**
+### **📅 Phase 2: Takip ve Favori Sistemi (Hafta 3-4)**
 
-#### **2.1 Respect Sistemi**
+#### **2.1 Sanatçı Takip Sistemi**
+- [ ] Sanatçı takip etme/bırakma
+- [ ] Takip listesi yönetimi
+- [ ] Takip sayısı güncellemeleri
+- [ ] Takip durumu kontrolü
+
+#### **2.2 Şarkı Favori Sistemi**
+- [ ] Şarkı favori ekleme/çıkarma
+- [ ] Favori şarkılar listesi
+- [ ] Favori sayısı güncellemeleri
+- [ ] Favori durumu kontrolü
+
+#### **2.3 Otomatik Chat Room Katılımı**
+- [ ] Takip edilen sanatçılar için chat room oluşturma
+- [ ] Favori şarkılar için chat room oluşturma
+- [ ] Otomatik üyelik sistemi
+- [ ] Chat room üyelik yönetimi
+
+### **📅 Phase 3: Respect Ekonomisi (Hafta 5-6)**
+
+#### **3.1 Respect Sistemi**
 - [ ] Respect gönderme/alma
 - [ ] Balance yönetimi
 - [ ] Transaction geçmişi
-- [ ] Günlük bonus sistemi
+- [ ] Respect limitleri ve kontroller
 
-#### **2.2 Takip ve Favori Sistemi**
-- [ ] Sanatçı takip etme/bırakma
-- [ ] Şarkı favori ekleme/çıkarma
-- [ ] Takip listesi yönetimi
-- [ ] Favori şarkılar listesi
+#### **3.2 Günlük Bonus Sistemi**
+- [ ] Günlük login bonus'u
+- [ ] Streak bonus sistemi
+- [ ] Özel etkinlik bonus'ları
+- [ ] Bonus claim kontrolü
 
-#### **2.3 Profil Sistemi**
-- [ ] Profil düzenleme
-- [ ] Avatar yükleme
-- [ ] Kullanıcı istatistikleri
-- [ ] Aktivite geçmişi
+#### **3.3 Respect Analytics**
+- [ ] Kullanıcı respect istatistikleri
+- [ ] Sanatçı respect analizi
+- [ ] Şarkı respect analizi
+- [ ] Respect trend'leri
 
-### **📅 Phase 3: Feed ve Topluluk (Hafta 5-6)**
+### **📅 Phase 4: Dual Feed Sistemi (Hafta 7-8)**
 
-#### **3.1 Feed Sistemi**
-- [ ] Genel feed (tüm aktiviteler)
-- [ ] Kişiselleştirilmiş feed
-- [ ] Feed filtreleme
-- [ ] Pagination
+#### **4.1 Topluluk Feed'i**
+- [ ] Tüm kullanıcı aktivitelerini toplama
+- [ ] Genel feed oluşturma
+- [ ] Feed filtreleme ve sıralama
+- [ ] Pagination ve infinite scroll
 
-#### **3.2 Aktivite Takibi**
-- [ ] Feed item oluşturma
-- [ ] Aktivite türleri
+#### **4.2 Kişiselleştirilmiş Feed**
+- [ ] Takip edilen sanatçı aktiviteleri
+- [ ] Favori şarkı aktiviteleri
+- [ ] Kişisel aktivite geçmişi
+- [ ] Feed özelleştirme seçenekleri
+
+#### **4.3 Feed Optimizasyonu**
 - [ ] Real-time feed güncellemeleri
-- [ ] Feed optimizasyonu
+- [ ] Feed cache sistemi
+- [ ] Feed performans optimizasyonu
+- [ ] Feed analytics
 
-#### **3.3 Topluluk Özellikleri**
-- [ ] Ortak ilgi alanları
-- [ ] Kullanıcı eşleştirme
-- [ ] Topluluk önerileri
-- [ ] Sosyal özellikler
+### **📅 Phase 5: Chat Room Sistemi (Hafta 9-10)**
 
-### **📅 Phase 4: Chat Sistemi (Hafta 7-8)**
+#### **5.1 Chat Room Altyapısı**
+- [ ] Chat room oluşturma ve yönetimi
+- [ ] Otomatik üyelik sistemi
+- [ ] Chat room istatistikleri
+- [ ] Chat room moderasyonu
 
-#### **4.1 Real-time Chat**
-- [ ] Chat odaları oluşturma
+#### **5.2 Real-time Mesajlaşma**
+- [ ] WebSocket bağlantısı
 - [ ] Mesaj gönderme/alma
-- [ ] Real-time mesajlaşma
-- [ ] Chat geçmişi
+- [ ] Real-time mesaj güncellemeleri
+- [ ] Mesaj geçmişi
 
-#### **4.2 Chat Özellikleri**
+#### **5.3 Chat Özellikleri**
 - [ ] Emoji desteği
 - [ ] Görsel paylaşım
 - [ ] Mesaj düzenleme/silme
-- [ ] Online durumu
+- [ ] Online durumu gösterimi
 
-#### **4.3 Chat Yönetimi**
-- [ ] Oda moderasyonu
-- [ ] Spam koruması
-- [ ] Kullanıcı engelleme
-- [ ] Chat kuralları
+### **📅 Phase 6: Bildirim ve İstatistik Sistemi (Hafta 11-12)**
 
-### **📅 Phase 5: Gelişmiş Özellikler (Hafta 9-10)**
-
-#### **5.1 Bildirim Sistemi**
+#### **6.1 Bildirim Sistemi**
 - [ ] Push notifications
 - [ ] Email bildirimleri
 - [ ] In-app bildirimler
 - [ ] Bildirim tercihleri
 
-#### **5.2 İstatistik ve Analytics**
+#### **6.2 İstatistik ve Analytics**
 - [ ] Kullanıcı istatistikleri
 - [ ] Sanatçı performans analizi
 - [ ] Şarkı trend analizi
 - [ ] Topluluk metrikleri
 
-#### **5.3 Gamification**
-- [ ] Başarı rozetleri
-- [ ] Seviye sistemi
-- [ ] Liderlik tabloları
-- [ ] Özel etkinlikler
+#### **6.3 Aktivite Takibi**
+- [ ] Kullanıcı aktivite geçmişi
+- [ ] Aktivite analizi
+- [ ] Kullanıcı davranış analizi
+- [ ] Engagement metrikleri
 
-### **📅 Phase 6: Optimizasyon ve Test (Hafta 11-12)**
+### **📅 Phase 7: Optimizasyon ve Test (Hafta 13-14)**
 
-#### **6.1 Performance Optimizasyonu**
+#### **7.1 Performance Optimizasyonu**
 - [ ] Database indexleme
 - [ ] Query optimizasyonu
 - [ ] Caching stratejileri
 - [ ] CDN entegrasyonu
 
-#### **6.2 Güvenlik ve Test**
+#### **7.2 Güvenlik ve Test**
 - [ ] Güvenlik testleri
 - [ ] Penetrasyon testleri
 - [ ] Load testing
 - [ ] User acceptance testing
 
-#### **6.3 Deployment ve Monitoring**
+#### **7.3 Deployment ve Monitoring**
 - [ ] Production deployment
 - [ ] Monitoring setup
 - [ ] Error tracking
@@ -575,7 +794,15 @@ CREATE TRIGGER trigger_update_favorite_counts
 ```
 src/
 ├── components/          # UI bileşenleri
+│   ├── common/         # Ortak bileşenler
+│   ├── layout/         # Layout bileşenleri
+│   └── forms/          # Form bileşenleri
 ├── pages/              # Sayfa bileşenleri
+│   ├── auth/           # Authentication sayfaları
+│   ├── profile/        # Profil sayfaları
+│   ├── feed/           # Feed sayfaları
+│   ├── chat/           # Chat sayfaları
+│   └── artist/         # Sanatçı sayfaları
 ├── api/                # API servisleri
 ├── hooks/              # Custom hooks
 ├── context/            # React context'leri
@@ -603,7 +830,8 @@ supabase/
 ├── respect/            # Respect transactions
 ├── feed/               # Feed operations
 ├── chat/               # Chat operations
-└── notifications/      # Notification system
+├── notifications/      # Notification system
+└── stats/              # Statistics and analytics
 ```
 
 ---
@@ -611,13 +839,15 @@ supabase/
 ## 📊 **VERİ AKIŞI DIAGRAMI**
 
 ```
-Kullanıcı Kayıt → Profil Oluşturma → Sanatçı/Şarkı Takip → Respect Gönderme
-       ↓                    ↓                    ↓                    ↓
-   Auth System         Profile System      Follow System       Respect System
-       ↓                    ↓                    ↓                    ↓
-   User Session        User Data          Follow Relations    Transactions
-       ↓                    ↓                    ↓                    ↓
-   Feed Items ←─────────────┼────────────────────┼────────────────────┘
+Kullanıcı Kayıt → Email Doğrulama → Profil Oluşturma → Sanatçı/Şarkı Takip → Respect Gönderme
+       ↓                    ↓                    ↓                    ↓                    ↓
+   Auth System         Email System         Profile System      Follow System       Respect System
+       ↓                    ↓                    ↓                    ↓                    ↓
+   User Session        Verification         User Data          Follow Relations    Transactions
+       ↓                    ↓                    ↓                    ↓                    ↓
+   Feed Items ←─────────────┼────────────────────┼────────────────────┼────────────────────┘
+       ↓
+   Chat Room Membership ←───┼────────────────────┼────────────────────┘
        ↓
    Real-time Chat ←─────────┼────────────────────┘
        ↓
@@ -634,6 +864,7 @@ Kullanıcı Kayıt → Profil Oluşturma → Sanatçı/Şarkı Takip → Respect
 - [ ] Database performansı optimal
 - [ ] Güvenlik standartları karşılanıyor
 - [ ] Error handling tamamlanmış
+- [ ] Chat room sistemi sorunsuz çalışıyor
 
 ### **Kullanıcı Deneyimi Kriterleri**
 - [ ] Smooth onboarding akışı
@@ -641,6 +872,7 @@ Kullanıcı Kayıt → Profil Oluşturma → Sanatçı/Şarkı Takip → Respect
 - [ ] Fast loading times
 - [ ] Responsive design
 - [ ] Accessibility standartları
+- [ ] Kişiselleştirilmiş feed çalışıyor
 
 ### **İş Kriterleri**
 - [ ] Respect ekonomisi çalışıyor
@@ -648,15 +880,19 @@ Kullanıcı Kayıt → Profil Oluşturma → Sanatçı/Şarkı Takip → Respect
 - [ ] User engagement yüksek
 - [ ] Retention rate pozitif
 - [ ] Viral growth potansiyeli
+- [ ] Chat room'lar aktif kullanılıyor
 
 ---
 
 ## 🚀 **SONRAKI ADIMLAR**
 
 1. **Veritabanı Migration'larını Oluştur**
-2. **API Servislerini Güncelle**
-3. **Frontend Component'lerini Entegre Et**
-4. **Real-time Özellikleri Test Et**
-5. **User Testing Başlat**
+2. **Authentication ve Profil Sistemini Kur**
+3. **Takip ve Favori Sistemini Entegre Et**
+4. **Respect Ekonomisini Aktifleştir**
+5. **Dual Feed Sistemini Geliştir**
+6. **Chat Room Sistemini Test Et**
+7. **Bildirim Sistemini Entegre Et**
+8. **Performance Optimizasyonu Yap**
 
 Bu dokümantasyon, Respect uygulamanızın geliştirilmesi için kapsamlı bir yol haritası sunmaktadır. Her phase'in tamamlanmasından sonra test ve değerlendirme yapılması önerilir. 
