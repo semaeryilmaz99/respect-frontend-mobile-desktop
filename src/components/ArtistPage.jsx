@@ -1,4 +1,5 @@
 import React from 'react'
+import { useParams } from 'react-router-dom'
 import Header from './Header'
 import ArtistProfile from './ArtistProfile'
 import TopSupporters from './TopSupporters'
@@ -8,6 +9,10 @@ import SongsList from './SongsList'
 import BackButton from './common/BackButton'
 
 const ArtistPage = () => {
+  const { id } = useParams()
+  
+  console.log('🎨 ArtistPage - Artist ID:', id)
+
   return (
     <div className="artist-page">
       <div className="page-header">
@@ -15,11 +20,11 @@ const ArtistPage = () => {
       </div>
       <Header />
       <div className="artist-content">
-        <ArtistProfile />
-        <TopSupporters />
-        <RecentSupporters />
-        <RealTimeChat />
-        <SongsList />
+        <ArtistProfile artistId={id} />
+        <TopSupporters artistId={id} />
+        <RecentSupporters artistId={id} />
+        <RealTimeChat roomId={id} roomType="artist" />
+        <SongsList artistId={id} />
       </div>
     </div>
   )

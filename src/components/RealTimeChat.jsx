@@ -8,6 +8,8 @@ const RealTimeChat = ({ roomId = 'general', roomType = 'artist' }) => {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [currentUser, setCurrentUser] = useState(null)
+  
+  console.log('💬 RealTimeChat props:', { roomId, roomType })
 
   // Chat room'a join ol ve mesajları yükle
   useEffect(() => {
@@ -66,12 +68,26 @@ const RealTimeChat = ({ roomId = 'general', roomType = 'artist' }) => {
   }
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !currentUser) return
+    if (!newMessage.trim() || !currentUser) {
+      console.log('❌ Cannot send message:', { 
+        hasMessage: !!newMessage.trim(), 
+        hasUser: !!currentUser,
+        message: newMessage,
+        user: currentUser 
+      })
+      return
+    }
 
     try {
-      console.log('📤 Sending message:', newMessage)
+      console.log('📤 Sending message:', { 
+        message: newMessage, 
+        roomId, 
+        roomType, 
+        userId: currentUser.id 
+      })
       
-      await chatManager.sendMessage(roomId, roomType, newMessage.trim())
+      const result = await chatManager.sendMessage(roomId, roomType, newMessage.trim())
+      console.log('✅ Message sent result:', result)
       setNewMessage('')
       
       // Manuel olarak mesajları yenile (real-time çalışmazsa)
@@ -99,6 +115,18 @@ const RealTimeChat = ({ roomId = 'general', roomType = 'artist' }) => {
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       sendMessage()
+    }
+  }
+
+  // Debug: Test mesajı gönder
+  const sendTestMessage = async () => {
+    console.log('🧪 Sending test message...')
+    
+    try {
+      const result = await chatManager.sendMessage(roomId, roomType, 'Test mesajı - ' + new Date().toLocaleTimeString())
+      console.log('✅ Test message sent:', result)
+    } catch (error) {
+      console.error('❌ Test message failed:', error)
     }
   }
 

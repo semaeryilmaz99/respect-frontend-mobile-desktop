@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../config/supabase'
 import FavoriteButton from './FavoriteButton'
 
-const SongsList = () => {
+const SongsList = ({ artistId: propArtistId }) => {
   const navigate = useNavigate()
-  const { artistId } = useParams()
+  const { artistId: paramArtistId } = useParams()
+  const artistId = propArtistId || paramArtistId
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

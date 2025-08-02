@@ -48,14 +48,20 @@ export class RealtimeChatManager {
         throw new Error('User not authenticated')
       }
 
+      console.log('👤 Current user:', user)
+
+      const messageData = {
+        room_id: roomId,
+        room_type: roomType,
+        user_id: user.id,
+        message: message
+      }
+
+      console.log('📝 Message data to insert:', messageData)
+
       const { data, error } = await supabase
         .from('chat_messages')
-        .insert({
-          room_id: roomId,
-          room_type: roomType,
-          user_id: user.id,
-          message: message
-        })
+        .insert(messageData)
         .select(`
           *,
           profiles(username, full_name, avatar_url)
@@ -63,6 +69,7 @@ export class RealtimeChatManager {
         .single()
 
       if (error) {
+        console.error('❌ Database insert error:', error)
         throw error
       }
 
