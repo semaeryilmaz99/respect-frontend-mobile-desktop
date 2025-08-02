@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../context/AppContext'
 import userService from '../api/userService'
+import followService from '../api/followService'
 import LoadingSpinner from './LoadingSpinner'
 
 const UserFollowedArtists = () => {
@@ -10,6 +11,7 @@ const UserFollowedArtists = () => {
   const [followedArtists, setFollowedArtists] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [unfollowingArtistId, setUnfollowingArtistId] = useState(null)
 
   useEffect(() => {
     const fetchFollowedArtists = async () => {
@@ -47,6 +49,32 @@ const UserFollowedArtists = () => {
     fetchFollowedArtists()
   }, [user])
 
+  // Takipten çıkma fonksiyonu
+  const handleUnfollowArtist = async (artistId, artistName) => {
+    if (!user?.id) {
+      console.log('❌ No user ID available for unfollow')
+      return
+    }
+
+    console.log('🔄 Unfollowing artist:', artistId, artistName)
+    setUnfollowingArtistId(artistId)
+
+    try {
+      // followService ile takipten çık
+      await followService.toggleFollowArtist(artistId, true) // true = unfollow
+      
+      // Local state'den sanatçıyı kaldır
+      setFollowedArtists(prev => prev.filter(artist => artist.id !== artistId))
+      
+      console.log('✅ Successfully unfollowed artist:', artistName)
+    } catch (error) {
+      console.error('❌ Error unfollowing artist:', error)
+      setError('Takipten çıkarken hata oluştu')
+    } finally {
+      setUnfollowingArtistId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="user-followed-artists">
@@ -77,15 +105,27 @@ const UserFollowedArtists = () => {
         <div className="followed-artists-grid">
           {followedArtists.map((artist, index) => (
             <div key={artist.id} className="followed-artist-card">
-                             <div className="followed-artist-image">
-                 <img 
-                   src={artist.avatar_url || `/src/assets/artist/Image (${(index % 6) + 1}).png`} 
-                   alt={artist.name} 
-                 />
-               </div>
+              <div className="followed-artist-image">
+                <img 
+                  src={artist.avatar_url || `/src/assets/artist/Image (${(index % 6) + 1}).png`} 
+                  alt={artist.name} 
+                />
+              </div>
               <h4 className="followed-artist-name">{artist.name}</h4>
-              <div className="followed-artist-status">
+              <div className="followed-artist-actions">
                 <span className="following-badge">Takip Ediliyor</span>
+                <button
+                  className={`unfollow-button ${unfollowingArtistId === artist.id ? 'loading' : ''}`}
+                  onClick={() => handleUnfollowArtist(artist.id, artist.name)}
+                  disabled={unfollowingArtistId === artist.id}
+                  title={`${artist.name} takibini bırak`}
+                >
+                  {unfollowingArtistId === artist.id ? (
+                    <span className="loading-spinner">⏳</span>
+                  ) : (
+                    'Takipten Çık'
+                  )}
+                </button>
               </div>
             </div>
           ))}

@@ -4446,9 +4446,12 @@ html {
   line-height: 1.3;
 }
 
-.followed-artist-status {
+.followed-artist-actions {
+  margin-top: 8px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
 }
 
 .following-badge {
@@ -4460,6 +4463,35 @@ html {
   border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.unfollow-button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+}
+
+.unfollow-button:hover {
+  background: #ff5252;
+  transform: translateY(-1px);
+}
+
+.unfollow-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.unfollow-button.loading {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 /* User Favorited Songs */
