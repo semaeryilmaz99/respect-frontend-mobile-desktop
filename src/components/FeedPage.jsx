@@ -1,63 +1,62 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from './Header'
 import FeedCard from './FeedCard'
 import RealTimeChat from './RealTimeChat'
-import feedService from '../api/feedService'
+import { useApi, usePaginatedApi } from '../hooks/useApi'
+import { feedService } from '../api'
 
 const FeedPage = () => {
   const [activeTab, setActiveTab] = useState('community')
-  const [feedData, setFeedData] = useState([])
-  const [respectFlowData, setRespectFlowData] = useState([])
-  const [_topArtists, setTopArtists] = useState([])
-  const [_topSongs, setTopSongs] = useState([])
-  const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+  
+  // API hook'ları kullanarak veri yükleme
+  const { 
+    data: feedData, 
+    loading: feedLoading, 
+    error: feedError, 
+    execute: refreshFeed 
+  } = useApi(
+    () => activeTab === 'community' 
+      ? feedService.getFeed() 
+      : feedService.getPersonalFeed(),
+    [activeTab], // activeTab değiştiğinde yeniden yükle
+    true // component mount olduğunda otomatik çalışsın
+  )
+
+  const { 
+    data: respectFlowData, 
+    loading: respectFlowLoading 
+  } = useApi(
+    () => feedService.getRespectFlow(),
+    [],
+    true
+  )
+
+  const { 
+    data: topArtists, 
+    loading: artistsLoading 
+  } = useApi(
+    () => feedService.getTopArtists(),
+    [],
+    true
+  )
+
+  const { 
+    data: topSongs, 
+    loading: songsLoading 
+  } = useApi(
+    () => feedService.getTopSongs(),
+    [],
+    true
+  )
   
   const handleRespectSend = () => {
     navigate('/send-respect')
   }
 
-  // Database'den verileri yükle
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true)
-        
-        // Aktif tab'a göre feed verilerini yükle
-        if (activeTab === 'community') {
-          // Topluluk feed'i - tüm kullanıcı aktiviteleri
-          const feed = await feedService.getFeed()
-          console.log('🔍 Community feed data:', feed)
-          setFeedData(feed)
-        } else if (activeTab === 'personal') {
-          // Kişisel feed'i - takip edilen sanatçılar ve favori şarkılar
-          const feed = await feedService.getPersonalFeed()
-          console.log('🔍 Personal feed data:', feed)
-          setFeedData(feed)
-        }
-        
-        // Respect flow verilerini yükle
-        const respectFlow = await feedService.getRespectFlow()
-        setRespectFlowData(respectFlow)
-        
-        // Top artists yükle
-        const artists = await feedService.getTopArtists()
-        setTopArtists(artists)
-        
-        // Top songs yükle
-        const songs = await feedService.getTopSongs()
-        setTopSongs(songs)
-        
-      } catch (error) {
-        console.error('❌ Feed data load error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadData()
-  }, [activeTab]) // activeTab değiştiğinde yeniden yükle
+  // Loading durumlarını birleştir
+  const isLoading = feedLoading || respectFlowLoading || artistsLoading || songsLoading
 
   // Database'den gelen verileri formatla
   const formatFeedData = (data) => {
@@ -94,12 +93,26 @@ const FeedPage = () => {
   }
 
   // Loading durumu
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="feed-page">
         <Header />
         <div className="loading-container">
           <p>Veriler yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error durumu
+  if (feedError) {
+    return (
+      <div className="feed-page">
+        <Header />
+        <div className="error-container">
+          <h3>Bir hata oluştu</h3>
+          <p>{feedError.message}</p>
+          <button onClick={refreshFeed}>Tekrar Dene</button>
         </div>
       </div>
     )
