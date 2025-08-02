@@ -6,10 +6,33 @@ const feedService = {
     try {
       console.log('📊 Fetching general feed data from Supabase...')
       
-      // Basit sorgu ile başla
+      // Önce feed_items tablosunda kaç kayıt olduğunu kontrol edelim
+      const { count, error: countError } = await supabase
+        .from('feed_items')
+        .select('*', { count: 'exact', head: true })
+
+      console.log('📊 Total feed items count:', count, countError)
+      
+      // Basit sorgu ile başla - profiles tablosu olmadığı için kaldırıldı
       let query = supabase
         .from('feed_items')
-        .select('*')
+        .select(`
+          *,
+          artists (
+            id,
+            name,
+            avatar_url
+          ),
+          songs (
+            id,
+            title,
+            cover_url,
+            artists (
+              id,
+              name
+            )
+          )
+        `)
         .order('created_at', { ascending: false })
 
       if (type !== 'all') {
@@ -20,6 +43,7 @@ const feedService = {
         .range((page - 1) * 20, page * 20 - 1)
 
       if (error) {
+        console.error('❌ Feed query error:', error)
         throw error
       }
 
@@ -199,19 +223,34 @@ const feedService = {
         throw new Error('Kullanıcı giriş yapmamış')
       }
 
+      console.log('👤 Current user for feed item:', user.id)
+
+      // Önce feed_items tablosunun yapısını kontrol edelim
+      const { data: tableInfo, error: tableError } = await supabase
+        .from('feed_items')
+        .select('*')
+        .limit(1)
+
+      console.log('📊 Feed items table structure check:', tableInfo, tableError)
+
+      const feedItemData = {
+        type,
+        user_id: user.id,
+        artist_id: artistId,
+        song_id: songId,
+        content
+      }
+
+      console.log('📝 Inserting feed item data:', feedItemData)
+
       const { data, error } = await supabase
         .from('feed_items')
-        .insert({
-          type,
-          user_id: user.id,
-          artist_id: artistId,
-          song_id: songId,
-          content
-        })
+        .insert(feedItemData)
         .select()
         .single()
 
       if (error) {
+        console.error('❌ Feed item insert error:', error)
         throw error
       }
 

@@ -12,6 +12,8 @@ export const followService = {
         throw new Error('Kullanıcı giriş yapmamış')
       }
       
+      console.log('👤 Current user ID:', user.id)
+      
       const { data, error } = await supabase
         .from('artist_follows')
         .insert({
@@ -22,6 +24,7 @@ export const followService = {
         .single()
 
       if (error) {
+        console.error('❌ Insert error:', error)
         if (error.code === '23505') { // Unique constraint violation
           throw new Error('Bu sanatçıyı zaten takip ediyorsunuz')
         }

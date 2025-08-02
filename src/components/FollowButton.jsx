@@ -70,14 +70,20 @@ const FollowButton = ({ artistId, artistName, initialFollowersCount = 0, size = 
       // Feed item oluştur (sadece follow edildiğinde)
       if (!isFollowing) {
         try {
-          await feedService.createArtistFollowedFeedItem(artistId)
-          console.log('✅ Feed item created for artist follow')
+          console.log('🔄 Creating feed item for artist follow...')
+          const feedResult = await feedService.createArtistFollowedFeedItem(artistId)
+          console.log('📊 Feed item creation result:', feedResult)
+          if (feedResult.error) {
+            console.error('❌ Feed item creation failed:', feedResult.error)
+          } else {
+            console.log('✅ Feed item created successfully:', feedResult.data)
+          }
         } catch (error) {
           console.error('❌ Feed item creation failed:', error)
         }
       }
       
-      console.log(`✅ ${isFollowing ? 'Unfollowed' : 'Followed'} artist: ${artistName}`)
+      console.log(`✅ ${isFollowing ? 'Unfollowed' : 'Followed'} artist: ${artistId}`)
     } catch (error) {
       console.error('Follow toggle error:', error)
       setError(error.message || 'Bir hata oluştu')

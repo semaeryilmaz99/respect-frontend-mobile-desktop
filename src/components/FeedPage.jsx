@@ -64,7 +64,10 @@ const FeedPage = () => {
       type: item.type,
       title: getFeedItemTitle(item),
       buttonText: getFeedItemButtonText(item),
-      profileImage: getFeedItemImage(item)
+      profileImage: getFeedItemImage(item),
+      artistId: item.artist_id,
+      songId: item.song_id,
+      userId: item.user_id
     }))
   }
 
@@ -72,11 +75,16 @@ const FeedPage = () => {
     if (item.type === 'respect_sent') {
       const amount = item.content?.amount || 0
       const message = item.content?.message || ''
-      return `Şarkıya ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
+      const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
+      const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
+      return `${songTitle} - ${artistName} şarkısına ${amount} respect gönderildi${message ? `: "${message}"` : ''}`
     } else if (item.type === 'song_favorited') {
-      return 'Şarkı favorilere eklendi'
+      const songTitle = item.songs?.title || 'Bilinmeyen Şarkı'
+      const artistName = item.songs?.artists?.name || 'Bilinmeyen Sanatçı'
+      return `${songTitle} - ${artistName} şarkısı favorilere eklendi`
     } else if (item.type === 'artist_followed') {
-      return 'Sanatçı takip edildi'
+      const artistName = item.artists?.name || 'Bilinmeyen Sanatçı'
+      return `${artistName} sanatçısı takip edildi`
     }
     return 'Aktivite gerçekleşti'
   }
@@ -88,7 +96,15 @@ const FeedPage = () => {
     return 'Görüntüle'
   }
 
-  const getFeedItemImage = () => {
+  const getFeedItemImage = (item) => {
+    if (item.type === 'artist_followed' && item.artists?.avatar_url) {
+      return item.artists.avatar_url
+    } else if (item.type === 'song_favorited' && item.songs?.cover_url) {
+      return item.songs.cover_url
+    } else if (item.type === 'respect_sent' && item.songs?.cover_url) {
+      return item.songs.cover_url
+    }
+    // Fallback image
     return '/src/assets/artist/Image.png'
   }
 
@@ -119,7 +135,9 @@ const FeedPage = () => {
   }
 
   // Database'den gelen verileri kullan
+  console.log('📊 Raw feed data:', feedData)
   const currentData = formatFeedData(feedData)
+  console.log('📊 Formatted feed data:', currentData)
 
   return (
     <div className="feed-page">
@@ -206,6 +224,9 @@ const FeedPage = () => {
                 title={item.title}
                 buttonText={item.buttonText}
                 profileImage={item.profileImage}
+                artistId={item.artistId}
+                songId={item.songId}
+                userId={item.userId}
               />
             ))}
           </div>
